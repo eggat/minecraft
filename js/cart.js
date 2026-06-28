@@ -1,4 +1,4 @@
-// 購物車與裝備管理 (報價單具名顯示版)
+// 購物車與裝備管理 (最終優化版：具名顯示、價格自動加總)
 const Cart = {
     items: [],
     activeItemId: null,
@@ -72,13 +72,11 @@ const Cart = {
         let activeItem = this.getActiveItem();
         if (!activeItem) return;
 
-        // 如果是基底裝備 (ID >= 200)，直接替換掉該 slot 現有的基底
         if (enchant.id >= 200) {
             activeItem.enchants = activeItem.enchants.filter(e => e.id < 200);
             activeItem.enchants.push(enchant);
             activeItem.name = enchant.fullName; 
         } else {
-            // 一般附魔
             if (!enchant.slots.includes(activeItem.slot)) return;
             const index = activeItem.enchants.findIndex(e => e.id === enchant.id);
             if (index > -1) {
@@ -87,39 +85,6 @@ const Cart = {
                 activeItem.enchants.push(enchant);
             }
         }
-        this.render();
-    },
-
-    isSelected(enchantId) {
-        this._ensureArray();
-        const activeItem = this.getActiveItem();
-        if (!activeItem) return false;
-        return activeItem.enchants.some(e => e.id === enchantId);
-    },
-
-    checkIncompatible(enchant) {
-        this._ensureArray();
-        const activeItem = this.getActiveItem();
-        if (!activeItem || enchant.id >= 200) return false;
-
-        const isLocalIncompatible = activeItem.enchants.some(selected => 
-            (selected.incompatible && selected.incompatible.includes(enchant.name)) ||
-            (enchant.incompatible && enchant.incompatible.includes(selected.name))
-        );
-        if (isLocalIncompatible) return true;
-
-        if (enchant.rarity === '特殊') {
-            const isAlreadyInOtherItem = this.items.some(item => 
-                item.id !== activeItem.id && item.enchants.some(e => e.id === enchant.id)
-            );
-            if (isAlreadyInOtherItem) return true;
-        }
-        return false;
-    },
-
-    clear() {
-        this.items = [];
-        this.activeItemId = null;
         this.render();
     },
 
@@ -140,39 +105,37 @@ const Cart = {
         container.innerHTML = '';
         
         const total = this.getTotal();
-        const totalPriceEl = document.getElementById('total-price-value');
-        if (totalPriceEl) totalPriceEl.innerText = (typeof Calculator !== 'undefined' ? Calculator.formatPrice(total) : total);
+        if (document.getElementById('total-price-value')) document.getElementById('total-price-value').innerText = total;
 
-        if (this.items.length === 0) {
-            container.innerHTML = `<div style="text-align:center; color:#888; padding:20px;">報價單為空</div>`;
-            return;
-        }
-
-        const currentItem = this.getActiveItem() || this.items[0];
-        const qty = currentItem.quantity || 1;
-
-        // 面板渲染邏輯... (UI 部分維持原有架構，增加基底項目顯示)
-        const contentBox = document.createElement('div');
-        contentBox.style.cssText = 'background:#18181d; padding:15px; border-radius:10px; border:1px solid #444;';
-        
-        // 渲染列表
-        currentItem.enchants.forEach(e => {
-            contentBox.innerHTML += `<div style="display:flex; justify-content:space-between; margin:5px 0;"><span>${e.fullName}</span><span>${e.price > 0 ? '$'+e.price : '自備'}</span></div>`;
+        this.items.forEach((item, index) => {
+            const qty = item.quantity || 1;
+            const contentBox = document.createElement('div');
+            contentBox.style.cssText = 'background:#18181d; padding:15px; margin-bottom:10px; border-radius:10px; border:1px solid #444;';
+            
+            contentBox.innerHTML = `<div style="font-weight:bold; color:#fff; border-bottom:1px solid #333; padding-bottom:5px;">${item.name} (x${qty})</div>`;
+            
+            let itemSubtotal = 0;
+            item.enchants.forEach(e => {
+                itemSubtotal += e.price;
+                contentBox.innerHTML += `<div style="display:flex; justify-content:space-between; margin:3px 0; font-size:0.9rem;"><span>${e.fullName}</span><span>${e.price > 0 ? e.price : '自備'}</span></div>`;
+            });
+            
+            contentBox.innerHTML += `<div style="border-top:1px solid #333; margin-top:5px; text-align:right;">小計: ${itemSubtotal * qty}</div>`;
+            container.appendChild(contentBox);
         });
-
-        contentBox.innerHTML += `<div style="border-top:1px solid #333; margin-top:10px; text-align:right;">小計(x${qty}): $${this.items.filter(i=>i.id===currentItem.id).reduce((sum,i)=>sum + i.enchants.reduce((s,e)=>s+e.price,0),0)*qty}</div>`;
-        container.appendChild(contentBox);
     },
 
     generateQuoteText() {
         let text = '【Minecraft 附魔報價單】\n\n';
         this.items.forEach((item, index) => {
+            const qty = item.quantity || 1;
             text += `=== ${item.name} (#${index + 1}) ===\n`;
+            let itemTotal = 0;
             item.enchants.forEach(e => {
                 text += `${e.fullName}: ${e.price > 0 ? e.price : '自備'}\n`;
+                itemTotal += e.price;
             });
-            const subtotal = item.enchants.reduce((s, e) => s + e.price, 0) * (item.quantity || 1);
-            text += `小計 (x${item.quantity || 1}): ${subtotal}\n\n`;
+            text += `小計 (x${qty}): ${itemTotal * qty}\n\n`;
         });
         text += `總金額: ${this.getTotal()}`;
         return text;
