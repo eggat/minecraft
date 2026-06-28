@@ -1,4 +1,4 @@
-// 購物車與多件裝備狀態管理 (含全域特殊附魔唯一性判定)
+// 購物車與多件裝備狀態管理 (含全域特殊附魔唯一性判定 + 專業報價格式化)
 const Cart = {
     items: [],
     activeItemId: null,
@@ -59,6 +59,7 @@ const Cart = {
         let activeItem = this.getActiveItem();
         if (!activeItem) return;
 
+        // 檢查該附魔是否適用於此裝備類型
         if (!enchant.slots.includes(activeItem.slot)) return;
 
         const index = activeItem.enchants.findIndex(e => e.id === enchant.id);
@@ -82,14 +83,14 @@ const Cart = {
         const activeItem = this.getActiveItem();
         if (!activeItem) return false;
 
-        // 1. 同一件裝備上的互斥判斷 (依據 JSON 中的 incompatible 陣列)
+        // 1. 同一件裝備內的互斥判定
         const isLocalIncompatible = activeItem.enchants.some(selected => 
             (selected.incompatible && selected.incompatible.includes(enchant.name)) ||
             (enchant.incompatible && enchant.incompatible.includes(selected.name))
         );
         if (isLocalIncompatible) return true;
 
-        // 2. 全域「特殊」附魔排斥：如果購物車其他裝備已有此特殊附魔，則不可選
+        // 2. 全域特殊附魔唯一性判定 (防呆機制)
         if (enchant.rarity === '特殊') {
             const isAlreadyInOtherItem = this.items.some(item => 
                 item.id !== activeItem.id && item.enchants.some(e => e.id === enchant.id)
@@ -120,18 +121,14 @@ const Cart = {
         const container = document.getElementById('selected-list');
         if (!container) return;
         
-        container.style.border = 'none';
-        container.style.background = 'transparent';
-        container.style.padding = '0';
         container.innerHTML = '';
-
         const totalPriceEl = document.getElementById('total-price-value');
         if (totalPriceEl && typeof Calculator !== 'undefined') {
             totalPriceEl.innerText = Calculator.formatPrice(this.getTotal());
         }
 
         if (this.items.length === 0) {
-            container.innerHTML = `<div style="text-align: center; color: #888; padding: 40px;">報價單為空</div>`;
+            container.innerHTML = `<div style="text-align: center; color: #888; padding: 40px; font-size: 1rem;">報價單目前為空</div>`;
             return;
         }
 
@@ -143,6 +140,7 @@ const Cart = {
 
         const currentItem = this.items[currentIndex];
 
+        // 繪製導航面板
         const navHeader = document.createElement('div');
         navHeader.style.cssText = 'display: flex; align-items: center; justify-content: space-between; background: #22222b; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid var(--border-color);';
 
@@ -163,28 +161,33 @@ const Cart = {
 
         const titleDiv = document.createElement('div');
         titleDiv.style.textAlign = 'center';
-        titleDiv.style.flex = '1';
-        titleDiv.innerHTML = `<div style="font-weight: bold; color: #fff;">${displayName}</div><div style="font-size: 0.8rem; color: #aaa;">裝備 ${currentIndex + 1} / ${this.items.length}</div>`;
+        titleDiv.innerHTML = `<div style="font-weight: bold; color: #fff; font-size: 1.1rem;">${displayName}</div><div style="font-size: 0.75rem; color: #aaa;">裝備 ${currentIndex + 1} / ${this.items.length}</div>`;
 
         navHeader.appendChild(prevBtn);
         navHeader.appendChild(titleDiv);
         navHeader.appendChild(nextBtn);
         container.appendChild(navHeader);
 
+        // 繪製附魔列表
         const contentBox = document.createElement('div');
         contentBox.style.cssText = 'background: #18181d; padding: 15px; border-radius: 10px; border: 1px solid var(--border-color);';
         
         const actionDiv = document.createElement('div');
         actionDiv.style.textAlign = 'right';
-        actionDiv.innerHTML = `<button style="background: transparent; color: var(--danger-color); border: 1px solid var(--danger-color); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">🗑️ 捨棄</button>`;
+        actionDiv.innerHTML = `<button style="background: transparent; color: var(--danger-color); border: 1px solid var(--danger-color); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">捨棄此裝備</button>`;
         actionDiv.querySelector('button').onclick = () => { this.removeEquipment(currentItem.id); renderEnchantments(); };
         contentBox.appendChild(actionDiv);
 
         const enchantListDiv = document.createElement('div');
         currentItem.enchants.filter(e => e.id < 200).forEach(enchant => {
             const enDiv = document.createElement('div');
-            enDiv.style.cssText = 'background: #25252d; padding: 8px; margin: 5px 0; border-radius: 6px; display: flex; justify-content: space-between;';
-            enDiv.innerHTML = `<span>${enchant.fullName}</span><button style="background:none; border:none; color:red; cursor:pointer;">&times;</button>`;
+            enDiv.style.cssText = 'background: #25252d; padding: 10px; margin: 6px 0; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;';
+            enDiv.innerHTML = `
+                <div>
+                    <div style="font-weight: bold; color: #f5f5f5;">${enchant.fullName}</div>
+                    <div style="font-size: 0.8rem; color: #999;">$${enchant.price}</div>
+                </div>
+                <button style="background:none; border:none; color:var(--danger-color); cursor:pointer; font-size: 1.2rem;">&times;</button>`;
             enDiv.querySelector('button').onclick = () => { this.toggleEnchant(enchant); renderEnchantments(); };
             enchantListDiv.appendChild(enDiv);
         });
@@ -199,10 +202,15 @@ const Cart = {
             let displayName = item.name;
             const baseEnchant = item.enchants.find(e => e.id >= 200);
             if (baseEnchant) displayName = baseEnchant.fullName.replace('【裝備】', '');
-            text += `=== 【${displayName}】 #${index + 1} ===\n`;
+            
+            text += `=== ${displayName} (#${index + 1}) ===\n`;
             item.enchants.filter(e => e.id < 200).forEach(e => text += `- ${e.fullName}: ${Calculator.formatPrice(e.price)}\n`);
-            text += '\n';
+            
+            let itemTotal = 0;
+            item.enchants.forEach(e => itemTotal += e.price);
+            text += `小計: ${Calculator.formatPrice(itemTotal)}\n\n`;
         });
+        text += `====================\n`;
         text += `總計金額: ${Calculator.formatPrice(this.getTotal())}`;
         return text;
     }
