@@ -1,4 +1,4 @@
-// 購物車與多件裝備狀態管理 (含精準的裝備價格顯示邏輯)
+// 購物車與多件裝備狀態管理 (含精準的裝備價格顯示邏輯 - 修正版)
 const Cart = {
     items: [],
     activeItemId: null,
@@ -11,7 +11,7 @@ const Cart = {
         };
     },
 
-    // 判斷該裝備是否為「玩家自備」的項目
+    // 修正：將 'sword' 從自備清單移除，讓它會正常顯示價格
     isSelfProvided(slot) {
         const selfProvidedSlots = ['bow', 'crossbow', 'fishing', 'elytra', 'trident', 'mace'];
         return selfProvidedSlots.includes(slot);
@@ -127,7 +127,6 @@ const Cart = {
         this.items.forEach(item => {
             let itemTotal = 0;
             item.enchants.forEach(e => itemTotal += e.price);
-            // 只有「非自備」項目才累加基底價格
             const basePrice = !this.isSelfProvided(item.slot) ? (item.enchants.find(e => e.id >= 200)?.price || 0) : 0;
             total += (itemTotal + basePrice) * (item.quantity || 1);
         });
@@ -187,7 +186,7 @@ const Cart = {
         const contentBox = document.createElement('div');
         contentBox.style.cssText = 'background: #18181d; padding: 15px; border-radius: 10px; border: 1px solid var(--border-color);';
         
-        // 控制列
+        // 數量調整 UI
         contentBox.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed #333; padding-bottom:12px; margin-bottom:10px;"><div style="display:flex; align-items:center; gap:8px;"><span style="color:#aaa; font-size:0.9rem;">數量:</span><div style="display:flex; align-items:center; background:#25252d; border-radius:6px; border:1px solid #333;"><button style="background:transparent; color:${qtyStr > 1 ? '#aaa' : '#444'}; border:none; padding:4px 10px; cursor:${qtyStr > 1 ? 'pointer' : 'not-allowed'};" onclick="Cart.updateQuantity('${currentItem.id}', -1)">❮</button><span style="color:#fff; font-weight:bold; padding:0 12px; border-left:1px solid #333; border-right:1px solid #333;">${qtyStr}</span><button style="background:transparent; color:${qtyStr < 3 ? '#aaa' : '#444'}; border:none; padding:4px 10px; cursor:${qtyStr < 3 ? 'pointer' : 'not-allowed'};" onclick="Cart.updateQuantity('${currentItem.id}', 1)">❯</button></div></div><button style="background:transparent; color:var(--danger-color); border:1px solid var(--danger-color); padding:4px 8px; border-radius:6px; cursor:pointer;" onclick="Cart.removeEquipment('${currentItem.id}')">🗑️</button></div>`;
 
         // 附魔清單
