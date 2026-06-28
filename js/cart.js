@@ -1,4 +1,4 @@
-// 購物車與多件裝備狀態管理 (含箭頭數量選擇器與全域特殊附魔唯一性判定 - 專業報價版)
+// 購物車與多件裝備狀態管理 (含箭頭數量選擇器與全域特殊附魔唯一性判定 - 報價單文字優化版)
 const Cart = {
     items: [],
     activeItemId: null,
@@ -231,8 +231,11 @@ const Cart = {
         let enchantsTotal = 0;
         const displayEnchants = currentItem.enchants.filter(e => e.id < 200);
 
-        // 顯示基底價格 (即使為 0)
-        enchantListDiv.innerHTML = `<div style="color:var(--price-normal); font-size:0.85rem; padding:5px 0;">基本裝備費用: ${typeof Calculator !== 'undefined' ? Calculator.formatPrice(basePrice) : basePrice}</div>`;
+        // 判斷是否為盔甲類，決定是否顯示價格
+        const isArmor = ['helmet', 'chestplate', 'leggings', 'boots'].includes(currentItem.slot);
+        const priceDisplay = isArmor ? (typeof Calculator !== 'undefined' ? Calculator.formatPrice(basePrice) : basePrice) : '自備';
+
+        enchantListDiv.innerHTML = `<div style="color:var(--price-normal); font-size:0.85rem; padding:5px 0;">${displayName} 售價: ${priceDisplay}</div>`;
 
         displayEnchants.forEach(enchant => {
             enchantsTotal += enchant.price;
@@ -246,7 +249,8 @@ const Cart = {
 
         const subtotalDiv = document.createElement('div');
         subtotalDiv.style.cssText = 'padding-top:10px; border-top:1px solid #333; text-align:right; font-weight:bold;';
-        subtotalDiv.innerHTML = `小計 (x${qtyStr}): <span style="color:var(--price-expensive); font-size:1.2rem;">${typeof Calculator !== 'undefined' ? Calculator.formatPrice((basePrice + enchantsTotal) * qtyStr) : (basePrice + enchantsTotal) * qtyStr}</span>`;
+        const singleTotal = isArmor ? (basePrice + enchantsTotal) : enchantsTotal;
+        subtotalDiv.innerHTML = `小計 (x${qtyStr}): <span style="color:var(--price-expensive); font-size:1.2rem;">${typeof Calculator !== 'undefined' ? Calculator.formatPrice(singleTotal * qtyStr) : singleTotal * qtyStr}</span>`;
         contentBox.appendChild(subtotalDiv);
 
         container.appendChild(contentBox);
@@ -260,13 +264,15 @@ const Cart = {
             let displayName = item.name;
             const baseEnchant = item.enchants.find(e => e.id >= 200);
             let basePrice = 0;
+            const isArmor = ['helmet', 'chestplate', 'leggings', 'boots'].includes(item.slot);
+            
             if (baseEnchant) {
                 displayName = baseEnchant.fullName.replace('【裝備】', '');
                 basePrice = baseEnchant.price;
             }
             
             text += `=== ${displayName} (#${index + 1}) ===\n`;
-            text += `基底費用: ${typeof Calculator !== 'undefined' ? Calculator.formatPrice(basePrice) : basePrice}\n`;
+            text += `裝備售價: ${isArmor ? (typeof Calculator !== 'undefined' ? Calculator.formatPrice(basePrice) : basePrice) : '自備'}\n`;
             
             let enchantsTotal = 0;
             item.enchants.filter(e => e.id < 200).forEach(e => {
@@ -274,9 +280,10 @@ const Cart = {
                 enchantsTotal += e.price;
             });
             
-            text += `單件總額: ${typeof Calculator !== 'undefined' ? Calculator.formatPrice(basePrice + enchantsTotal) : basePrice + enchantsTotal}\n`;
+            const singleTotal = isArmor ? (basePrice + enchantsTotal) : enchantsTotal;
+            text += `單件總額: ${typeof Calculator !== 'undefined' ? Calculator.formatPrice(singleTotal) : singleTotal}\n`;
             text += `採購數量: x ${qtyStr}\n`;
-            text += `小計: ${typeof Calculator !== 'undefined' ? Calculator.formatPrice((basePrice + enchantsTotal) * qtyStr) : (basePrice + enchantsTotal) * qtyStr}\n\n`;
+            text += `小計: ${typeof Calculator !== 'undefined' ? Calculator.formatPrice(singleTotal * qtyStr) : singleTotal * qtyStr}\n\n`;
         });
         text += `====================\n`;
         text += `總計金額: ${typeof Calculator !== 'undefined' ? Calculator.formatPrice(this.getTotal()) : this.getTotal()}`;
