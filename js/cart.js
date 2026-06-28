@@ -1,4 +1,4 @@
-// 購物車與多件裝備狀態管理 (含數量選擇與全域特殊附魔唯一性判定 - 方案 B)
+// 購物車與多件裝備狀態管理 (含箭頭數量選擇器與全域特殊附魔唯一性判定 - 方案 B)
 const Cart = {
     items: [],
     activeItemId: null,
@@ -24,7 +24,7 @@ const Cart = {
             id: 'eq_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
             slot: slot,
             name: this.slotNames[slot] || slot,
-            quantity: 1, // 新增數量屬性，預設為 1
+            quantity: 1, // 預設數量為 1
             enchants: []
         };
         this.items.push(newItem);
@@ -55,7 +55,7 @@ const Cart = {
         return this.items.find(item => item.id === this.activeItemId);
     },
 
-    // 新增：更新數量的功能 (限制 1~3)
+    // 更新數量的功能 (限制 1~3 件)
     updateQuantity(id, change) {
         this._ensureArray();
         const item = this.items.find(i => i.id === id);
@@ -64,7 +64,7 @@ const Cart = {
         let newQty = (item.quantity || 1) + change;
         if (newQty < 1) newQty = 1;
         if (newQty > 3) {
-            if (typeof showToast === 'function') showToast('單件裝備數量上限為 3 件！');
+            if (typeof showToast === 'function') showToast('單一裝備數量最多只能 3 件！');
             newQty = 3;
         }
 
@@ -101,7 +101,7 @@ const Cart = {
         const activeItem = this.getActiveItem();
         if (!activeItem) return false;
 
-        // 1. 裝備內部的互斥判定
+        // 1. 同一件裝備內的互斥判定
         const isLocalIncompatible = activeItem.enchants.some(selected => 
             (selected.incompatible && selected.incompatible.includes(enchant.name)) ||
             (enchant.incompatible && enchant.incompatible.includes(selected.name))
@@ -109,7 +109,6 @@ const Cart = {
         if (isLocalIncompatible) return true;
 
         // 2. 全域特殊附魔排斥：只檢查「其他裝備」是否有此特殊附魔
-        // 這樣就不會阻擋「同一件裝備增加數量」的行為 (方案 B)
         if (enchant.rarity === '特殊') {
             const isAlreadyInOtherItem = this.items.some(item => 
                 item.id !== activeItem.id && item.enchants.some(e => e.id === enchant.id)
@@ -162,14 +161,14 @@ const Cart = {
         const currentItem = this.items[currentIndex];
         const qtyStr = currentItem.quantity || 1;
 
-        // 1. 導航面板
+        // 1. 頂部裝備切換導航
         const navHeader = document.createElement('div');
         navHeader.style.cssText = 'display: flex; align-items: center; justify-content: space-between; background: #22222b; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid var(--border-color);';
 
         const createNavBtn = (text, isEnabled, onClick) => {
             const btn = document.createElement('button');
             btn.innerHTML = text;
-            btn.style.cssText = `background: ${isEnabled ? '#333' : 'transparent'}; border: none; color: ${isEnabled ? '#fff' : '#444'}; width: 36px; height: 36px; border-radius: 50%; cursor: ${isEnabled ? 'pointer' : 'default'}; transition: 0.2s;`;
+            btn.style.cssText = `background: ${isEnabled ? '#333' : 'transparent'}; border: none; color: ${isEnabled ? '#fff' : '#444'}; width: 36px; height: 36px; border-radius: 50%; cursor: ${isEnabled ? 'pointer' : 'default'}; transition: 0.2s; font-size: 1.1rem;`;
             if (isEnabled) btn.onclick = onClick;
             return btn;
         };
@@ -187,28 +186,35 @@ const Cart = {
 
         const titleDiv = document.createElement('div');
         titleDiv.style.textAlign = 'center';
-        titleDiv.innerHTML = `<div style="font-weight: bold; color: #fff; font-size: 1.1rem;">${displayName}</div><div style="font-size: 0.75rem; color: #aaa;">項目 ${currentIndex + 1} / ${this.items.length}</div>`;
+        titleDiv.innerHTML = `<div style="font-weight: bold; color: #fff; font-size: 1.1rem; letter-spacing: 1px;">${displayName}</div><div style="font-size: 0.75rem; color: #aaa; margin-top: 4px;">項目 ${currentIndex + 1} / ${this.items.length}</div>`;
 
         navHeader.appendChild(prevBtn);
         navHeader.appendChild(titleDiv);
         navHeader.appendChild(nextBtn);
         container.appendChild(navHeader);
 
-        // 2. 內容區塊
+        // 2. 裝備內容區塊
         const contentBox = document.createElement('div');
         contentBox.style.cssText = 'background: #18181d; padding: 15px; border-radius: 10px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px;';
         
-        // 2.1 頂部控制列 (數量加減 + 捨棄)
+        // 2.1 控制列 (箭頭數量調整 + 捨棄按鈕)
         const controlRow = document.createElement('div');
-        controlRow.style.cssText = 'display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--border-color); padding-bottom: 10px; margin-bottom: 5px;';
+        controlRow.style.cssText = 'display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--border-color); padding-bottom: 12px; margin-bottom: 5px;';
         
-        // 數量選擇器 UI
+        // 箭頭數量選擇器
+        const qtyContainer = document.createElement('div');
+        qtyContainer.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+        
+        const qtyLabel = document.createElement('span');
+        qtyLabel.innerText = '數量:';
+        qtyLabel.style.cssText = 'color: #aaa; font-size: 0.9rem;';
+
         const qtyBox = document.createElement('div');
         qtyBox.style.cssText = 'display: flex; align-items: center; background: #25252d; border-radius: 6px; border: 1px solid var(--border-color); overflow: hidden;';
         
         const btnMinus = document.createElement('button');
-        btnMinus.innerHTML = '－';
-        btnMinus.style.cssText = `background: transparent; color: ${qtyStr > 1 ? '#aaa' : '#444'}; border: none; padding: 4px 10px; cursor: ${qtyStr > 1 ? 'pointer' : 'not-allowed'}; font-weight: bold; transition: 0.2s;`;
+        btnMinus.innerHTML = '❮';
+        btnMinus.style.cssText = `background: transparent; color: ${qtyStr > 1 ? '#aaa' : '#444'}; border: none; padding: 4px 12px; cursor: ${qtyStr > 1 ? 'pointer' : 'not-allowed'}; font-size: 1rem; transition: 0.2s;`;
         if (qtyStr > 1) {
             btnMinus.onmouseover = () => btnMinus.style.background = '#333';
             btnMinus.onmouseout = () => btnMinus.style.background = 'transparent';
@@ -217,11 +223,11 @@ const Cart = {
 
         const spanQty = document.createElement('span');
         spanQty.innerText = qtyStr;
-        spanQty.style.cssText = 'color: #fff; font-weight: bold; padding: 0 12px; font-size: 0.95rem; text-align: center; min-width: 32px;';
+        spanQty.style.cssText = 'color: #fff; font-weight: bold; padding: 0 15px; font-size: 1rem; text-align: center; min-width: 40px; border-left: 1px solid #333; border-right: 1px solid #333;';
 
         const btnPlus = document.createElement('button');
-        btnPlus.innerHTML = '＋';
-        btnPlus.style.cssText = `background: transparent; color: ${qtyStr < 3 ? '#aaa' : '#444'}; border: none; padding: 4px 10px; cursor: ${qtyStr < 3 ? 'pointer' : 'not-allowed'}; font-weight: bold; transition: 0.2s;`;
+        btnPlus.innerHTML = '❯';
+        btnPlus.style.cssText = `background: transparent; color: ${qtyStr < 3 ? '#aaa' : '#444'}; border: none; padding: 4px 12px; cursor: ${qtyStr < 3 ? 'pointer' : 'not-allowed'}; font-size: 1rem; transition: 0.2s;`;
         if (qtyStr < 3) {
             btnPlus.onmouseover = () => btnPlus.style.background = '#333';
             btnPlus.onmouseout = () => btnPlus.style.background = 'transparent';
@@ -231,6 +237,8 @@ const Cart = {
         qtyBox.appendChild(btnMinus);
         qtyBox.appendChild(spanQty);
         qtyBox.appendChild(btnPlus);
+        qtyContainer.appendChild(qtyLabel);
+        qtyContainer.appendChild(qtyBox);
 
         // 捨棄按鈕
         const btnRemove = document.createElement('button');
@@ -240,7 +248,7 @@ const Cart = {
         btnRemove.onmouseout = () => { btnRemove.style.background = 'transparent'; btnRemove.style.color = 'var(--danger-color)'; };
         btnRemove.onclick = () => { this.removeEquipment(currentItem.id); if(typeof renderEnchantments === 'function') renderEnchantments(); };
 
-        controlRow.appendChild(qtyBox);
+        controlRow.appendChild(qtyContainer);
         controlRow.appendChild(btnRemove);
         contentBox.appendChild(controlRow);
 
@@ -250,18 +258,18 @@ const Cart = {
         const displayEnchants = currentItem.enchants.filter(e => e.id < 200);
 
         if (displayEnchants.length === 0 && basePrice === 0) {
-            enchantListDiv.innerHTML = '<div style="color: #666; text-align: center; padding: 15px 0; font-size: 0.85rem;">尚未添加附魔</div>';
+            enchantListDiv.innerHTML = '<div style="color: #666; text-align: center; padding: 20px 0; font-size: 0.85rem;">尚未添加附魔</div>';
         } else {
             displayEnchants.forEach(enchant => {
                 enchantsTotal += enchant.price;
                 const enDiv = document.createElement('div');
-                enDiv.style.cssText = 'background: #25252d; padding: 8px 12px; margin: 6px 0; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;';
+                enDiv.style.cssText = 'background: #25252d; padding: 8px 12px; margin: 6px 0; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid var(--primary-color);';
                 enDiv.innerHTML = `
                     <div>
                         <div style="font-weight: bold; color: #f5f5f5; font-size: 0.95rem;">${enchant.fullName}</div>
-                        <div style="font-size: 0.8rem; color: var(--price-normal);">$${enchant.price}</div>
+                        <div style="font-size: 0.8rem; color: var(--price-normal); margin-top: 2px;">$${enchant.price}</div>
                     </div>
-                    <button style="background:none; border:none; color:var(--danger-color); cursor:pointer; font-size: 1.4rem;">&times;</button>`;
+                    <button style="background:none; border:none; color:var(--danger-color); cursor:pointer; font-size: 1.4rem; padding: 0 5px;" title="移除此附魔">&times;</button>`;
                 enDiv.querySelector('button').onclick = () => { this.toggleEnchant(enchant); if(typeof renderEnchantments === 'function') renderEnchantments(); };
                 enchantListDiv.appendChild(enDiv);
             });
@@ -275,11 +283,11 @@ const Cart = {
         const subtotalDiv = document.createElement('div');
         subtotalDiv.style.cssText = 'margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: flex-end;';
         subtotalDiv.innerHTML = `
-            <div style="color: #aaa; font-size: 0.85rem; line-height: 1.4;">
-                單件小計: ${typeof Calculator !== 'undefined' ? Calculator.formatPrice(singleTotal) : singleTotal}<br>
-                採購數量: x ${qtyStr}
+            <div style="color: #aaa; font-size: 0.85rem; line-height: 1.5;">
+                單件金額: ${typeof Calculator !== 'undefined' ? Calculator.formatPrice(singleTotal) : singleTotal}<br>
+                採購數量: <strong>x ${qtyStr}</strong>
             </div>
-            <div style="color: var(--price-normal); font-weight: bold; font-size: 1.25rem;">
+            <div style="color: var(--price-normal); font-weight: bold; font-size: 1.3rem;">
                 ${typeof Calculator !== 'undefined' ? Calculator.formatPrice(groupTotal) : groupTotal}
             </div>
         `;
@@ -316,7 +324,8 @@ const Cart = {
             let itemTotal = basePrice;
             displayEnchants.forEach(e => itemTotal += e.price);
             
-            text += `\n數量: x ${qtyStr}\n`;
+            text += `\n單件金額: ${typeof Calculator !== 'undefined' ? Calculator.formatPrice(itemTotal) : itemTotal}\n`;
+            text += `採購數量: x ${qtyStr}\n`;
             text += `小計: ${typeof Calculator !== 'undefined' ? Calculator.formatPrice(itemTotal * qtyStr) : (itemTotal * qtyStr)}\n\n`;
         });
         text += `====================\n`;
