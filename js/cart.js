@@ -49,7 +49,10 @@ const Cart = {
         if (!item) return;
         let newQty = (item.quantity || 1) + change;
         if (newQty < 1) newQty = 1;
-        if (newQty > 3) newQty = 3;
+        if (newQty > 3) {
+            if (typeof showToast === 'function') showToast('單一裝備數量上限為 3 件！');
+            newQty = 3;
+        }
         item.quantity = newQty;
         this.render();
         if (typeof StorageManager !== 'undefined' && StorageManager.saveCart) StorageManager.saveCart(this.items);
@@ -72,13 +75,11 @@ const Cart = {
         let activeItem = this.getActiveItem();
         if (!activeItem) return;
 
-        // 如果選的是裝備基底 (ID >= 200)，先移除舊的基底，再放入新的
         if (enchant.id >= 200) {
             activeItem.enchants = activeItem.enchants.filter(e => e.id < 200);
             activeItem.enchants.push(enchant);
             activeItem.name = enchant.fullName || enchant.name;
         } else {
-            // 一般附魔處理
             if (!Array.isArray(enchant.slots) || !enchant.slots.includes(activeItem.slot)) return;
             const index = activeItem.enchants.findIndex(e => e.id === enchant.id);
             if (index > -1) {
@@ -108,10 +109,7 @@ const Cart = {
         if (isLocalIncompatible) return true;
 
         if (enchant.rarity === '特殊') {
-            const isAlreadyInOtherItem = this.items.some(item =>
-                item.id !== activeItem.id && item.enchants.some(e => e.id === enchant.id)
-            );
-            if (isAlreadyInOtherItem) return true;
+            return this.items.some(item => item.id !== activeItem.id && item.enchants.some(e => e.id === enchant.id));
         }
         return false;
     },
@@ -127,8 +125,7 @@ const Cart = {
         this._ensureArray();
         let total = 0;
         this.items.forEach(item => {
-            let itemTotal = 0;
-            item.enchants.forEach(e => itemTotal += e.price);
+            let itemTotal = item.enchants.reduce((s, e) => s + e.price, 0);
             total += itemTotal * (item.quantity || 1);
         });
         return total;
@@ -141,49 +138,61 @@ const Cart = {
         container.innerHTML = '';
 
         const totalEl = document.getElementById('total-price-value');
-        if (totalEl) {
-            totalEl.innerText = typeof Calculator !== 'undefined' && Calculator.formatPrice ? Calculator.formatPrice(this.getTotal()) : this.getTotal();
-        }
+        if (totalEl) totalEl.innerText = typeof Calculator !== 'undefined' && Calculator.formatPrice ? Calculator.formatPrice(this.getTotal()) : this.getTotal();
 
         if (this.items.length === 0) {
             container.innerHTML = `<div style="text-align: center; color: #888; padding: 20px;">報價單目前為空</div>`;
             return;
         }
 
-        this.items.forEach((item) => {
-            const isActive = item.id === this.activeItemId;
-            const qty = item.quantity || 1;
-            
-            const box = document.createElement('div');
-            box.style.cssText = `background: #18181b; padding: 15px; border-radius: 10px; border: 2px solid ${isActive ? '#6366f1' : '#3f3f46'}; margin-bottom: 15px; cursor: pointer;`;
-            box.onclick = () => this.setActiveItem(item.id);
+        // --- 核心：恢復左右切換導航邏輯 ---
+        let currentIndex = this.items.findIndex(item => item.id === this.activeItemId);
+        if (currentIndex === -1) { currentIndex = this.items.length - 1; this.activeItemId = this.items[currentIndex].id; }
 
-            const header = document.createElement('div');
-            header.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;';
-            header.innerHTML = `
-                <strong style="color:#fff; font-size: 1.1rem;">${item.name}</strong>
+        const nav = document.createElement('div');
+        nav.style.cssText = 'display: flex; justify-content: space-between; align-items: center; background: #22222b; padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333;';
+        
+        const btnPrev = document.createElement('button');
+        btnPrev.innerText = '◀';
+        btnPrev.style.cssText = `background: ${currentIndex > 0 ? '#444' : 'transparent'}; border: none; color: #fff; padding: 5px 10px; border-radius: 4px; cursor: ${currentIndex > 0 ? 'pointer' : 'default'};`;
+        btnPrev.onclick = () => { if(currentIndex > 0) this.setActiveItem(this.items[currentIndex-1].id); };
+
+        const titleSpan = document.createElement('span');
+        titleSpan.style.cssText = 'color: #fff; font-weight: bold; font-size: 1rem;';
+        titleSpan.innerText = `${this.items[currentIndex].name} (${currentIndex + 1}/${this.items.length})`;
+
+        const btnNext = document.createElement('button');
+        btnNext.innerText = '▶';
+        btnNext.style.cssText = `background: ${currentIndex < this.items.length - 1 ? '#444' : 'transparent'}; border: none; color: #fff; padding: 5px 10px; border-radius: 4px; cursor: ${currentIndex < this.items.length - 1 ? 'pointer' : 'default'};`;
+        btnNext.onclick = () => { if(currentIndex < this.items.length - 1) this.setActiveItem(this.items[currentIndex+1].id); };
+
+        nav.appendChild(btnPrev); nav.appendChild(titleSpan); nav.appendChild(btnNext);
+        container.appendChild(nav);
+        // --- 核心結束 ---
+
+        const item = this.items[currentIndex];
+        const qty = item.quantity || 1;
+
+        const box = document.createElement('div');
+        box.style.cssText = 'background: #18181b; padding: 15px; border-radius: 8px; border: 1px solid #3f3f46;';
+        box.innerHTML = `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span style="color: #aaa;">數量:</span>
                 <div>
-                    <button onclick="event.stopPropagation(); Cart.updateQuantity('${item.id}', -1)" style="background:#333; border:none; color:#fff; padding:2px 8px; border-radius:4px;">❮</button>
-                    <span style="padding:0 10px; font-weight:bold;">${qty}</span>
-                    <button onclick="event.stopPropagation(); Cart.updateQuantity('${item.id}', 1)" style="background:#333; border:none; color:#fff; padding:2px 8px; border-radius:4px;">❯</button>
-                    <button onclick="event.stopPropagation(); Cart.removeEquipment('${item.id}')" style="background:#ef4444; border:none; color:#fff; padding:2px 8px; border-radius:4px; margin-left:10px;">刪除</button>
+                    <button onclick="Cart.updateQuantity('${item.id}', -1)">❮</button>
+                    <span style="padding: 0 10px;">${qty}</span>
+                    <button onclick="Cart.updateQuantity('${item.id}', 1)">❯</button>
+                    <button onclick="Cart.removeEquipment('${item.id}')" style="margin-left:10px;">🗑️</button>
                 </div>
-            `;
-            box.appendChild(header);
-
-            // 渲染附魔項目（包含基底）
-            item.enchants.forEach(e => {
-                const row = document.createElement('div');
-                row.style.cssText = 'display:flex; justify-content:space-between; padding:4px 0; font-size:0.95rem;';
-                row.innerHTML = `
-                    <span style="color:${e.id >= 200 ? '#a1a1aa' : '#e4e4e7'}">${e.fullName}</span>
-                    <span style="color:${e.price === 0 ? '#a1a1aa' : '#10b981'}">${e.price === 0 ? '自備' : '$' + e.price}</span>
-                `;
-                box.appendChild(row);
-            });
-
-            container.appendChild(box);
+            </div>`;
+        
+        item.enchants.forEach(e => {
+            box.innerHTML += `<div style="display:flex; justify-content:space-between; font-size:0.95rem;">
+                <span style="color:${e.id >= 200 ? '#aaa' : '#fff'}">${e.fullName}</span>
+                <span style="color:#10b981;">${e.price === 0 ? '自備' : '$' + e.price}</span>
+            </div>`;
         });
+        container.appendChild(box);
     },
 
     generateQuoteText() {
