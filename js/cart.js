@@ -26,6 +26,18 @@ const Cart = {
             quantity: 1,
             enchants: []
         };
+
+        // 自動帶入基底裝備，解決基底價格為0的問題
+        if (typeof ENCHANTS !== 'undefined' && Array.isArray(ENCHANTS)) {
+            const baseList = ENCHANTS.filter(e => e.id >= 200 && e.slots.includes(slot));
+            if (baseList.length > 0) {
+                // 優先選擇含有獄髓的裝備，否則選擇清單最後一個(確保鞘翅/弓等皆能帶入)
+                const baseItem = baseList.find(e => e.name.includes('獄髓')) || baseList[baseList.length - 1];
+                newItem.enchants.push(baseItem);
+                newItem.name = baseItem.fullName.replace('【裝備】', '');
+            }
+        }
+
         this.items.push(newItem);
         this.activeItemId = newItem.id;
         this.render();
