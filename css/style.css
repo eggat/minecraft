@@ -1,0 +1,476 @@
+/* ==================================================
+   全局變數與基礎設定 (極致深色主題)
+   ================================================== */
+:root {
+    --primary-color: #5cb85c;
+    --primary-hover: #4cae4c;
+    --danger-color: #e74c3c;
+    --danger-hover: #c0392b;
+    --bg-color: #0f0f13;
+    --panel-bg: #1a1a21;
+    --panel-hover: #22222b;
+    --text-color: #f5f5f5;
+    --border-color: #333344;
+    --tab-active: #4a90e2;
+    --price-normal: #a8d08d;
+    --price-expensive: #ff9800;
+    --rarity-normal: #b0bec5;
+    --rarity-special: #ce91ff;
+    --shadow-base: 0 4px 15px rgba(0, 0, 0, 0.5);
+    --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.7);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 20px;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* ==================================================
+   佈局與面板美化
+   ================================================== */
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 25px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.header h1 {
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    background: linear-gradient(90deg, #4a90e2, #ce91ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.layout-grid {
+    display: grid;
+    grid-template-columns: 220px 1fr 340px;
+    gap: 20px;
+    align-items: start;
+}
+
+.panel {
+    background: var(--panel-bg);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-base);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.panel:hover {
+    box-shadow: var(--shadow-hover);
+}
+
+.enchant-panel {
+    min-height: 600px;
+}
+
+.cart-panel {
+    min-height: 600px;
+}
+
+h2 {
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+    text-align: center;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 12px;
+    color: #fff;
+    letter-spacing: 1px;
+}
+
+/* ==================================================
+   左側：裝備列表 (第一層分支)
+   ================================================== */
+.equipment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.eq-btn {
+    padding: 12px 15px;
+    background: linear-gradient(145deg, #252530, #1d1d25);
+    color: #e0e0e0;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1.05rem;
+    transition: all 0.2s ease-in-out;
+    text-align: center;
+}
+
+.eq-btn:hover {
+    background: var(--panel-hover);
+    transform: translateY(-2px);
+    border-color: #555;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.eq-btn.active {
+    background: linear-gradient(145deg, var(--tab-active), #357abd);
+    border-color: var(--tab-active);
+    color: #fff;
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4);
+}
+
+/* ==================================================
+   中間：附魔配置區 (搜尋、分類、卡片)
+   ================================================== */
+.search-bar {
+    margin-bottom: 15px;
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: #121216;
+    color: #fff;
+    font-size: 1rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.search-bar input:focus {
+    outline: none;
+    border-color: var(--tab-active);
+    box-shadow: 0 0 10px rgba(74, 144, 226, 0.3);
+}
+
+.category-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 10px;
+    background: #252530;
+    color: #bbb;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+.tab-btn:hover {
+    background: #30303e;
+    color: #fff;
+}
+
+.tab-btn.active {
+    background: var(--tab-active);
+    color: #fff;
+    border-color: #3b7bc4;
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+}
+
+/* 附魔卡片網格 */
+.enchant-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+    max-height: 480px;
+    overflow-y: auto;
+    padding-right: 5px;
+    align-content: start;
+}
+
+.enchant-item {
+    background: linear-gradient(145deg, #252530, #1d1d25);
+    padding: 15px 12px;
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    user-select: none;
+}
+
+.enchant-item:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+    border-color: #666;
+}
+
+.enchant-item.selected {
+    border-color: var(--primary-color);
+    background: rgba(92, 184, 92, 0.15);
+    box-shadow: inset 0 0 15px rgba(92, 184, 92, 0.1), 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.enchant-item.disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
+    filter: grayscale(100%);
+}
+
+.name {
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin-bottom: 6px;
+    margin-top: 8px;
+    color: #fff;
+}
+
+.price {
+    font-weight: bold;
+    margin-top: 8px;
+    font-size: 1.15rem;
+    display: block;
+}
+
+.price.normal {
+    color: var(--price-normal);
+}
+
+.price.expensive {
+    color: var(--price-expensive);
+    text-shadow: 0 0 8px rgba(255, 152, 0, 0.4);
+}
+
+.rarity-label {
+    font-size: 0.85rem;
+    display: inline-block;
+    margin-bottom: 5px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.4);
+    font-weight: 600;
+}
+
+.rarity-普通 {
+    color: var(--rarity-normal);
+}
+
+.rarity-特殊 {
+    color: var(--rarity-special);
+    text-shadow: 0 0 8px rgba(206, 145, 255, 0.6);
+    border: 1px solid rgba(206, 145, 255, 0.3);
+}
+
+/* ==================================================
+   右側：總結與按鈕
+   ================================================== */
+.summary-box {
+    margin-top: auto;
+    /* 將結算區推到底部 */
+    border-top: 2px solid var(--border-color);
+    padding-top: 20px;
+}
+
+.total-price {
+    font-size: 1.6rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #f1c40f;
+    text-align: right;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    background: #121216;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.05rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+    filter: brightness(1.15);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-danger {
+    background: linear-gradient(145deg, var(--danger-color), var(--danger-hover));
+}
+
+.btn-primary {
+    background: linear-gradient(145deg, var(--tab-active), #357abd);
+}
+
+/* ==================================================
+   動態狀態切換動畫
+   ================================================== */
+#state-empty,
+#state-material,
+#state-enchant {
+    animation: fadeInScale 0.3s ease-out forwards;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.98) translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Toast 提示 */
+.toast-container {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 9999;
+}
+
+.toast {
+    background: #2b2b36;
+    color: #fff;
+    padding: 15px 25px;
+    border-radius: 8px;
+    border-left: 5px solid var(--primary-color);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+    font-weight: 600;
+    font-size: 1.05rem;
+    animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, fadeOut 0.4s 2.6s forwards;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+        transform: translateY(20px);
+        visibility: hidden;
+    }
+}
+
+/* ==================================================
+   捲軸美化
+   ================================================== */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #121216;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #3a3a4a;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555566;
+}
+
+/* ==================================================
+   響應式手機版 (Media Queries)
+   ================================================== */
+@media (max-width: 1024px) {
+    .layout-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .equipment-list {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .eq-btn {
+        flex: 1 1 calc(16.666% - 12px);
+        padding: 10px;
+    }
+
+    .enchant-panel,
+    .cart-panel {
+        min-height: auto;
+    }
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+
+    .header h1 {
+        font-size: 1.5rem;
+    }
+
+    .eq-btn {
+        flex: 1 1 calc(33.333% - 10px);
+        font-size: 0.95rem;
+    }
+
+    .category-tabs {
+        flex-wrap: wrap;
+    }
+
+    .tab-btn {
+        flex: 1 1 calc(50% - 10px);
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .action-buttons .btn {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+}
