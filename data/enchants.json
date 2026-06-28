@@ -31,7 +31,7 @@
     {"id": 30, "name": "擊退", "level": "II", "fullName": "擊退(Knockback)II", "price": 1000, "rarity": "普通", "slots": ["sword", "mace", "spear"], "description": "增加近戰攻擊時將目標擊退的距離", "incompatible": []},
     {"id": 31, "name": "掠奪", "level": "III", "fullName": "掠奪(Looting)III", "price": 1000, "rarity": "普通", "slots": ["sword", "axe", "mace", "spear"], "description": "增加擊殺生物時掉落物品的數量與稀有掉落率", "incompatible": ["厄運詛咒(Curse of Misfortune)"]},
     {"id": 32, "name": "幸運", "level": "III", "fullName": "幸運(Fortune)III", "price": 1000, "rarity": "普通", "slots": ["pickaxe", "axe", "shovel", "hoe"], "description": "增加挖掘特定方塊（如鑽石礦）時掉落的物品數量", "incompatible": ["絲綢之觸(Silk Touch)", "厄運詛咒(Curse of Misfortune)"]},
-    {"id": 33, "name": "效率", "level": "V", "fullName": "效率(Efficiency)V", "price": 1000, "rarity": "普通", "slots": ["pickaxe", "axe", "shovel", "hoe"], "description": "大幅加快採集與挖掘方塊的速度", "incompatible": []},
+    {"id": 33, "name": "效率", "level": "V", "fullName": "效率(Efficiency)V", "price": 1000, "rarity": "普通", "slots": ["pickaxe", "axe", "shovel", "hoe", "mace", "spear"], "description": "大幅加快採集與挖掘方塊的速度", "incompatible": []},
     {"id": 34, "name": "火焰附加", "level": "II", "fullName": "火焰附加(Fire Aspect)II", "price": 1000, "rarity": "普通", "slots": ["sword", "mace", "spear"], "description": "近戰攻擊時使目標著火，造成持續燃燒傷害", "incompatible": []},
     {"id": 35, "name": "衝擊", "level": "II", "fullName": "衝擊(Punch)II", "price": 1000, "rarity": "普通", "slots": ["bow"], "description": "增加弓箭擊中目標時的擊退距離", "incompatible": []},
     {"id": 36, "name": "海洋的祝福", "level": "III", "fullName": "海洋的祝福(Luck of the Sea)III", "price": 1000, "rarity": "普通", "slots": ["fishing"], "description": "增加釣魚時釣到寶藏的機率，降低釣到垃圾的機率", "incompatible": []},
@@ -136,5 +136,9 @@
     {"id": 213, "name": "【獄髓鏟】", "level": "", "fullName": "【裝備】獄髓鏟", "price": 1800, "rarity": "普通", "slots": ["shovel"], "description": "基底裝備", "incompatible": []},
     {"id": 214, "name": "【獄髓重錘】", "level": "", "fullName": "【裝備】獄髓重錘", "price": 100000, "rarity": "普通", "slots": ["mace"], "description": "基底裝備", "incompatible": []},
     {"id": 215, "name": "【三叉戟】", "level": "", "fullName": "【裝備】三叉戟", "price": 2500, "rarity": "普通", "slots": ["trident"], "description": "基底裝備", "incompatible": []},
-    {"id": 216, "name": "【獄髓長矛】", "level": "", "fullName": "【裝備】獄髓長矛", "price": 1800, "rarity": "普通", "slots": ["spear"], "description": "基底裝備", "incompatible": []}
+    {"id": 216, "name": "【獄髓長矛】", "level": "", "fullName": "【裝備】獄髓長矛", "price": 1800, "rarity": "普通", "slots": ["spear"], "description": "基底裝備", "incompatible": []},
+    {"id": 217, "name": "【鞘翅】", "level": "", "fullName": "【裝備】鞘翅", "price": 5000, "rarity": "普通", "slots": ["elytra"], "description": "基底裝備", "incompatible": []},
+    {"id": 218, "name": "【弓】", "level": "", "fullName": "【裝備】弓", "price": 1000, "rarity": "普通", "slots": ["bow"], "description": "基底裝備", "incompatible": []},
+    {"id": 219, "name": "【弩】", "level": "", "fullName": "【裝備】弩", "price": 1000, "rarity": "普通", "slots": ["crossbow"], "description": "基底裝備", "incompatible": []},
+    {"id": 220, "name": "【釣竿】", "level": "", "fullName": "【裝備】釣竿", "price": 1000, "rarity": "普通", "slots": ["fishing"], "description": "基底裝備", "incompatible": []}
 ]
