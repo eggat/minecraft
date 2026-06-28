@@ -134,11 +134,11 @@
     {"id": 211, "name": "【獄髓斧】", "level": "", "fullName": "【裝備】獄髓斧", "price": 1800, "rarity": "普通", "slots": ["axe"], "description": "基底裝備", "incompatible": []},
     {"id": 212, "name": "【獄髓鋤】", "level": "", "fullName": "【裝備】獄髓鋤", "price": 1800, "rarity": "普通", "slots": ["hoe"], "description": "基底裝備", "incompatible": []},
     {"id": 213, "name": "【獄髓鏟】", "level": "", "fullName": "【裝備】獄髓鏟", "price": 1800, "rarity": "普通", "slots": ["shovel"], "description": "基底裝備", "incompatible": []},
-    {"id": 214, "name": "【獄髓重錘】", "level": "", "fullName": "【裝備】獄髓重錘", "price": 100000, "rarity": "普通", "slots": ["mace"], "description": "基底裝備", "incompatible": []},
-    {"id": 215, "name": "【三叉戟】", "level": "", "fullName": "【裝備】三叉戟", "price": 2500, "rarity": "普通", "slots": ["trident"], "description": "基底裝備", "incompatible": []},
+    {"id": 214, "name": "【獄髓重錘】", "level": "", "fullName": "【裝備】獄髓重錘", "price": 0, "rarity": "普通", "slots": ["mace"], "description": "基底裝備", "incompatible": []},
+    {"id": 215, "name": "【三叉戟】", "level": "", "fullName": "【裝備】三叉戟", "price": 0, "rarity": "普通", "slots": ["trident"], "description": "基底裝備", "incompatible": []},
     {"id": 216, "name": "【獄髓長矛】", "level": "", "fullName": "【裝備】獄髓長矛", "price": 1800, "rarity": "普通", "slots": ["spear"], "description": "基底裝備", "incompatible": []},
-    {"id": 217, "name": "【鞘翅】", "level": "", "fullName": "【裝備】鞘翅", "price": 5000, "rarity": "普通", "slots": ["elytra"], "description": "基底裝備", "incompatible": []},
-    {"id": 218, "name": "【弓】", "level": "", "fullName": "【裝備】弓", "price": 1000, "rarity": "普通", "slots": ["bow"], "description": "基底裝備", "incompatible": []},
-    {"id": 219, "name": "【弩】", "level": "", "fullName": "【裝備】弩", "price": 1000, "rarity": "普通", "slots": ["crossbow"], "description": "基底裝備", "incompatible": []},
-    {"id": 220, "name": "【釣竿】", "level": "", "fullName": "【裝備】釣竿", "price": 1000, "rarity": "普通", "slots": ["fishing"], "description": "基底裝備", "incompatible": []}
+    {"id": 217, "name": "【鞘翅】", "level": "", "fullName": "【裝備】鞘翅", "price": 0, "rarity": "普通", "slots": ["elytra"], "description": "基底裝備", "incompatible": []},
+    {"id": 218, "name": "【弓】", "level": "", "fullName": "【裝備】弓", "price": 0, "rarity": "普通", "slots": ["bow"], "description": "基底裝備", "incompatible": []},
+    {"id": 219, "name": "【弩】", "level": "", "fullName": "【裝備】弩", "price": 0, "rarity": "普通", "slots": ["crossbow"], "description": "基底裝備", "incompatible": []},
+    {"id": 220, "name": "【釣竿】", "level": "", "fullName": "【裝備】釣竿", "price": 0, "rarity": "普通", "slots": ["fishing"], "description": "基底裝備", "incompatible": []}
 ]
