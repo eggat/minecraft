@@ -168,13 +168,16 @@ const Cart = {
         const prevBtn = createNavBtn('◀', currentIndex > 0, () => { this.setActiveItem(this.items[currentIndex - 1].id); });
         const nextBtn = createNavBtn('▶', currentIndex < this.items.length - 1, () => { this.setActiveItem(this.items[currentIndex + 1].id); });
         
-        let displayName = currentItem.name;
-        const baseEnchant = currentItem.enchants.find(e => e.id >= 200);
-        let basePrice = 0;
-        if (baseEnchant) {
-            displayName = baseEnchant.fullName.replace('【裝備】', '');
-            basePrice = baseEnchant.price;
-        }
+        // 在 render() 方法內
+// 將原本的顯示名稱邏輯改為：
+let displayName = currentItem.name; // 預設名稱（如：劍）
+const baseEnchant = currentItem.enchants.find(e => e.id >= 200); // 尋找已選裝備
+
+if (baseEnchant) {
+    displayName = baseEnchant.name; // 直接顯示裝備名稱 (如：下界合金劍)
+} else if (!this.isSelfProvided(currentItem.slot)) {
+    displayName = currentItem.name + " (請選擇裝備)"; // 提示玩家
+}
 
         const titleDiv = document.createElement('div');
         titleDiv.style.textAlign = 'center';
