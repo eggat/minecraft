@@ -1,4 +1,4 @@
-// 購物車與多件裝備狀態管理 (含箭頭數量選擇器與全域特殊附魔唯一性判定 - 報價單文字優化版)
+// 購物車與多件裝備狀態管理 (含數量選擇、全域唯一性判定、與「自備」邏輯對齊)
 const Cart = {
     items: [],
     activeItemId: null,
@@ -59,14 +59,12 @@ const Cart = {
         this._ensureArray();
         const item = this.items.find(i => i.id === id);
         if (!item) return;
-
         let newQty = (item.quantity || 1) + change;
         if (newQty < 1) newQty = 1;
         if (newQty > 3) {
             if (typeof showToast === 'function') showToast('單一裝備數量最多只能 3 件！');
             newQty = 3;
         }
-
         item.quantity = newQty;
         this.render();
         if (typeof StorageManager !== 'undefined') StorageManager.saveCart(this.items);
@@ -76,9 +74,7 @@ const Cart = {
         this._ensureArray();
         let activeItem = this.getActiveItem();
         if (!activeItem) return;
-
         if (!enchant.slots.includes(activeItem.slot)) return;
-
         const index = activeItem.enchants.findIndex(e => e.id === enchant.id);
         if (index > -1) {
             activeItem.enchants.splice(index, 1);
@@ -99,20 +95,17 @@ const Cart = {
         this._ensureArray();
         const activeItem = this.getActiveItem();
         if (!activeItem) return false;
-
         const isLocalIncompatible = activeItem.enchants.some(selected => 
             (selected.incompatible && selected.incompatible.includes(enchant.name)) ||
             (enchant.incompatible && enchant.incompatible.includes(selected.name))
         );
         if (isLocalIncompatible) return true;
-
         if (enchant.rarity === '特殊') {
             const isAlreadyInOtherItem = this.items.some(item => 
                 item.id !== activeItem.id && item.enchants.some(e => e.id === enchant.id)
             );
             if (isAlreadyInOtherItem) return true;
         }
-
         return false;
     },
 
@@ -128,7 +121,10 @@ const Cart = {
         this.items.forEach(item => {
             let itemTotal = 0;
             item.enchants.forEach(e => itemTotal += e.price);
-            total += itemTotal * (item.quantity || 1);
+            // 注意：基底價格如果是護甲才算
+            const isArmor = ['helmet', 'chestplate', 'leggings', 'boots'].includes(item.slot);
+            const basePrice = isArmor ? (item.enchants.find(e => e.id >= 200)?.price || 0) : 0;
+            total += (itemTotal + basePrice) * (item.quantity || 1);
         });
         return total;
     },
@@ -137,7 +133,6 @@ const Cart = {
         this._ensureArray();
         const container = document.getElementById('selected-list');
         if (!container) return;
-        
         container.innerHTML = '';
         const totalPriceEl = document.getElementById('total-price-value');
         if (totalPriceEl && typeof Calculator !== 'undefined') {
@@ -158,9 +153,9 @@ const Cart = {
         const currentItem = this.items[currentIndex];
         const qtyStr = currentItem.quantity || 1;
 
+        // UI 導航
         const navHeader = document.createElement('div');
         navHeader.style.cssText = 'display: flex; align-items: center; justify-content: space-between; background: #22222b; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid var(--border-color);';
-
         const createNavBtn = (text, isEnabled, onClick) => {
             const btn = document.createElement('button');
             btn.innerHTML = text;
@@ -168,10 +163,9 @@ const Cart = {
             if (isEnabled) btn.onclick = onClick;
             return btn;
         };
-
-        const prevBtn = createNavBtn('◀', currentIndex > 0, () => { this.setActiveItem(this.items[currentIndex - 1].id); if(typeof renderEnchantments === 'function') renderEnchantments(); });
-        const nextBtn = createNavBtn('▶', currentIndex < this.items.length - 1, () => { this.setActiveItem(this.items[currentIndex + 1].id); if(typeof renderEnchantments === 'function') renderEnchantments(); });
-
+        const prevBtn = createNavBtn('◀', currentIndex > 0, () => { this.setActiveItem(this.items[currentIndex - 1].id); });
+        const nextBtn = createNavBtn('▶', currentIndex < this.items.length - 1, () => { this.setActiveItem(this.items[currentIndex + 1].id); });
+        
         let displayName = currentItem.name;
         const baseEnchant = currentItem.enchants.find(e => e.id >= 200);
         let basePrice = 0;
@@ -183,76 +177,43 @@ const Cart = {
         const titleDiv = document.createElement('div');
         titleDiv.style.textAlign = 'center';
         titleDiv.innerHTML = `<div style="font-weight: bold; color: #fff; font-size: 1.1rem; letter-spacing: 1px;">${displayName}</div><div style="font-size: 0.75rem; color: #aaa; margin-top: 4px;">項目 ${currentIndex + 1} / ${this.items.length}</div>`;
-
-        navHeader.appendChild(prevBtn);
-        navHeader.appendChild(titleDiv);
-        navHeader.appendChild(nextBtn);
+        navHeader.appendChild(prevBtn); navHeader.appendChild(titleDiv); navHeader.appendChild(nextBtn);
         container.appendChild(navHeader);
 
+        // 內容
         const contentBox = document.createElement('div');
-        contentBox.style.cssText = 'background: #18181d; padding: 15px; border-radius: 10px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px;';
+        contentBox.style.cssText = 'background: #18181d; padding: 15px; border-radius: 10px; border: 1px solid var(--border-color);';
         
+        // 數量調整 UI
         const controlRow = document.createElement('div');
-        controlRow.style.cssText = 'display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--border-color); padding-bottom: 12px;';
-        
-        const qtyContainer = document.createElement('div');
-        qtyContainer.style.cssText = 'display: flex; align-items: center; gap: 8px;';
-        qtyContainer.innerHTML = `<span style="color:#aaa; font-size:0.9rem;">數量:</span>`;
-        
-        const qtyBox = document.createElement('div');
-        qtyBox.style.cssText = 'display: flex; align-items: center; background: #25252d; border-radius: 6px; border: 1px solid var(--border-color);';
-        
-        const btnMinus = document.createElement('button');
-        btnMinus.innerHTML = '❮';
-        btnMinus.style.cssText = `background:transparent; color:${qtyStr > 1 ? '#aaa' : '#444'}; border:none; padding:4px 10px; cursor:${qtyStr > 1 ? 'pointer' : 'not-allowed'}; font-size:1rem;`;
-        if (qtyStr > 1) btnMinus.onclick = () => this.updateQuantity(currentItem.id, -1);
-
-        const spanQty = document.createElement('span');
-        spanQty.innerText = qtyStr;
-        spanQty.style.cssText = 'color:#fff; font-weight:bold; padding:0 12px; border-left:1px solid #333; border-right:1px solid #333;';
-
-        const btnPlus = document.createElement('button');
-        btnPlus.innerHTML = '❯';
-        btnPlus.style.cssText = `background:transparent; color:${qtyStr < 3 ? '#aaa' : '#444'}; border:none; padding:4px 10px; cursor:${qtyStr < 3 ? 'pointer' : 'not-allowed'}; font-size:1rem;`;
-        if (qtyStr < 3) btnPlus.onclick = () => this.updateQuantity(currentItem.id, 1);
-
-        qtyBox.appendChild(btnMinus); qtyBox.appendChild(spanQty); qtyBox.appendChild(btnPlus);
-        qtyContainer.appendChild(qtyBox);
-        controlRow.appendChild(qtyContainer);
-
+        controlRow.style.cssText = 'display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #333; padding-bottom: 12px; margin-bottom: 10px;';
+        controlRow.innerHTML = `<div style="display:flex; align-items:center; gap:8px;"><span style="color:#aaa; font-size:0.9rem;">數量:</span><div style="display:flex; align-items:center; background:#25252d; border-radius:6px; border:1px solid #333;"><button style="background:transparent; color:${qtyStr > 1 ? '#aaa' : '#444'}; border:none; padding:4px 10px; cursor:${qtyStr > 1 ? 'pointer' : 'not-allowed'};" onclick="Cart.updateQuantity('${currentItem.id}', -1)">❮</button><span style="color:#fff; font-weight:bold; padding:0 12px; border-left:1px solid #333; border-right:1px solid #333;">${qtyStr}</span><button style="background:transparent; color:${qtyStr < 3 ? '#aaa' : '#444'}; border:none; padding:4px 10px; cursor:${qtyStr < 3 ? 'pointer' : 'not-allowed'};" onclick="Cart.updateQuantity('${currentItem.id}', 1)">❯</button></div></div>`;
         const btnRemove = document.createElement('button');
-        btnRemove.innerHTML = '🗑️';
-        btnRemove.style.cssText = 'background:transparent; color:var(--danger-color); border:1px solid var(--danger-color); padding:5px 8px; border-radius:6px; cursor:pointer;';
-        btnRemove.onclick = () => { this.removeEquipment(currentItem.id); renderEnchantments(); };
+        btnRemove.innerHTML = '🗑️'; btnRemove.style.cssText = 'background:transparent; color:var(--danger-color); border:1px solid var(--danger-color); padding:4px 8px; border-radius:6px; cursor:pointer;';
+        btnRemove.onclick = () => this.removeEquipment(currentItem.id);
         controlRow.appendChild(btnRemove);
         contentBox.appendChild(controlRow);
 
-        const enchantListDiv = document.createElement('div');
-        let enchantsTotal = 0;
-        const displayEnchants = currentItem.enchants.filter(e => e.id < 200);
-
-        // 判斷是否為盔甲類，決定是否顯示價格
+        // 附魔清單
         const isArmor = ['helmet', 'chestplate', 'leggings', 'boots'].includes(currentItem.slot);
-        const priceDisplay = isArmor ? (typeof Calculator !== 'undefined' ? Calculator.formatPrice(basePrice) : basePrice) : '自備';
-
-        enchantListDiv.innerHTML = `<div style="color:var(--price-normal); font-size:0.85rem; padding:5px 0;">${displayName} 售價: ${priceDisplay}</div>`;
-
-        displayEnchants.forEach(enchant => {
-            enchantsTotal += enchant.price;
+        const priceLabel = isArmor ? (typeof Calculator !== 'undefined' ? Calculator.formatPrice(basePrice) : basePrice) : '自備';
+        contentBox.innerHTML += `<div style="color:var(--price-normal); font-size:0.85rem; padding:5px 0;">裝備基礎售價: ${priceLabel}</div>`;
+        
+        currentItem.enchants.filter(e => e.id < 200).forEach(enchant => {
             const enDiv = document.createElement('div');
             enDiv.style.cssText = 'background:#25252d; padding:8px; margin:5px 0; border-radius:4px; display:flex; justify-content:space-between; align-items:center; border-left:3px solid var(--primary-color);';
             enDiv.innerHTML = `<div style="font-size:0.9rem;">${enchant.fullName} <span style="color:var(--price-normal); font-size:0.8rem;">($${enchant.price})</span></div><button style="background:none; border:none; color:var(--danger-color); cursor:pointer;">&times;</button>`;
-            enDiv.querySelector('button').onclick = () => { this.toggleEnchant(enchant); renderEnchantments(); };
-            enchantListDiv.appendChild(enDiv);
+            enDiv.querySelector('button').onclick = () => this.toggleEnchant(enchant);
+            contentBox.appendChild(enDiv);
         });
-        contentBox.appendChild(enchantListDiv);
 
+        // 結算
         const subtotalDiv = document.createElement('div');
-        subtotalDiv.style.cssText = 'padding-top:10px; border-top:1px solid #333; text-align:right; font-weight:bold;';
-        const singleTotal = isArmor ? (basePrice + enchantsTotal) : enchantsTotal;
+        subtotalDiv.style.cssText = 'margin-top:10px; padding-top:10px; border-top:1px solid #333; text-align:right; font-weight:bold;';
+        const eTotal = currentItem.enchants.filter(e => e.id < 200).reduce((sum, e) => sum + e.price, 0);
+        const singleTotal = isArmor ? (basePrice + eTotal) : eTotal;
         subtotalDiv.innerHTML = `小計 (x${qtyStr}): <span style="color:var(--price-expensive); font-size:1.2rem;">${typeof Calculator !== 'undefined' ? Calculator.formatPrice(singleTotal * qtyStr) : singleTotal * qtyStr}</span>`;
         contentBox.appendChild(subtotalDiv);
-
         container.appendChild(contentBox);
     },
 
@@ -265,7 +226,6 @@ const Cart = {
             const baseEnchant = item.enchants.find(e => e.id >= 200);
             let basePrice = 0;
             const isArmor = ['helmet', 'chestplate', 'leggings', 'boots'].includes(item.slot);
-            
             if (baseEnchant) {
                 displayName = baseEnchant.fullName.replace('【裝備】', '');
                 basePrice = baseEnchant.price;
