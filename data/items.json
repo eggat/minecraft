@@ -1,0 +1,7 @@
+{
+  "items": {
+    "helmet": { "name": "頭盔", "basePrice": 500 },
+    "chestplate": { "name": "胸甲", "basePrice": 800 },
+    "pickaxe": { "name": "鎬", "basePrice": 200 }
+  }
+}
