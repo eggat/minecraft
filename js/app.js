@@ -14,7 +14,7 @@ async function initApp() {
             throw new Error(`HTTP 錯誤狀態碼: ${response.status}`);
         }
         const data = await response.json();
-        // 強制寫入全域物件，避免變數被 data.js 的空陣列覆蓋
+        // 強制寫入全域物件，避免變數被覆蓋
         window.ENCHANTS_DATA = data;
         try { ENCHANTS = data; } catch (e) {} 
     } catch (error) {
@@ -47,7 +47,6 @@ async function initApp() {
             Cart.items = savedCart;
             Cart.activeItemId = savedCart[savedCart.length - 1].id; 
             
-            // 如果有已載入的裝備，自動點亮左側對應的裝備分類按鈕
             const activeItem = Cart.getActiveItem();
             if (activeItem) {
                 const btn = document.querySelector(`.eq-btn[data-slot="${activeItem.slot}"]`);
@@ -75,39 +74,31 @@ function bindEvents() {
                 const existingItems = Cart.items.filter(i => i.slot === slot);
                 
                 if (existingItems.length > 0) {
-                    // 如果購物車內已經有這個分類的裝備，直接將焦點切換過去繼續編輯
                     Cart.activeItemId = existingItems[existingItems.length - 1].id;
                 } else {
-                    // 全新建立流程
                     if (['helmet', 'chestplate', 'leggings', 'boots'].includes(slot)) {
-                        // 【盔甲分支】：清空焦點，強制觸發 State 1（材質二選一）
+                        // 【盔甲分支】：強制觸發 State 1（材質二選一）
                         Cart.activeItemId = null;
                     } else {
-                        // 【工具/武器/其他裝備分支】：自動建立對應基底，直接進入 State 2（附魔庫）
+                        // 【工具/武器/其他裝備分支】：自動建立對應基底
                         Cart.addEquipment(slot);
-                        let baseName = null;
-                        const slotName = Cart.slotNames[slot] || slot;
+                        const data = window.ENCHANTS_DATA || [];
+                        let baseItem = null;
                         
-                        // 判斷是否為預設需要冠上「獄髓」的裝備 (已移除名稱的【】符號以對齊最新 JSON)
+                        // 工具武器自動配獄髓，其他原味配對
                         if (['sword', 'axe', 'pickaxe', 'shovel', 'hoe', 'mace', 'spear'].includes(slot)) {
-                            baseName = `獄髓${slotName}`;
-                        } 
-                        // 判斷是否為獨立原味裝備（無材質前綴）
-                        else if (['trident', 'elytra', 'bow', 'crossbow', 'fishing'].includes(slot)) {
-                            baseName = `${slotName}`;
+                            baseItem = data.find(en => en.id >= 200 && Array.isArray(en.slots) && en.slots.includes(slot) && en.name.includes('獄髓'));
+                        } else {
+                            baseItem = data.find(en => en.id >= 200 && Array.isArray(en.slots) && en.slots.includes(slot));
                         }
 
-                        if (baseName) {
-                            const data = window.ENCHANTS_DATA || (typeof ENCHANTS !== 'undefined' ? ENCHANTS : []);
-                            const baseItem = data.find(en => en.name === baseName || en.fullName === baseName);
-                            if (baseItem) Cart.toggleEnchant(baseItem);
-                        }
+                        if (baseItem) Cart.toggleEnchant(baseItem);
                     }
                 }
             }
             
             renderEnchantments();
-            if (typeof Cart !== 'undefined') Cart.render(); // 同步更新右側
+            if (typeof Cart !== 'undefined') Cart.render();
         });
     });
 
@@ -138,7 +129,6 @@ function bindEvents() {
             if (typeof Cart !== 'undefined') Cart.clear();
             if (typeof StorageManager !== 'undefined') StorageManager.clearCart();
             
-            // 清空後強制回到未選定狀態 (State 0)
             document.querySelectorAll('.eq-btn').forEach(b => b.classList.remove('active'));
             renderEnchantments();
             if (typeof showToast === 'function') showToast('已清空所有選擇');
@@ -156,7 +146,6 @@ function bindEvents() {
             navigator.clipboard.writeText(text).then(() => {
                 if (typeof showToast === 'function') showToast('報價已複製到剪貼簿！');
             }).catch(err => {
-                console.error('複製失敗:', err);
                 if (typeof showToast === 'function') showToast('複製失敗');
             });
         });
@@ -180,10 +169,10 @@ function bindEvents() {
 }
 
 function getFilteredEnchants(targetSlot) {
-    const data = window.ENCHANTS_DATA || (typeof ENCHANTS !== 'undefined' ? ENCHANTS : []);
+    const data = window.ENCHANTS_DATA || [];
     if (!Array.isArray(data) || data.length === 0) return [];
     
-    // 過濾掉 ID >= 200 的基底裝備，確保材質永遠不會混在附魔清單中
+    // 過濾掉 ID >= 200 的基底裝備
     let list = data.filter(e => e.id < 200);
 
     if (currentCategory === '收藏') {
@@ -198,9 +187,10 @@ function getFilteredEnchants(targetSlot) {
     
     return list.filter(enchant => {
         const matchSlot = Array.isArray(enchant.slots) && enchant.slots.includes(targetSlot);
-        const matchSearch = searchQuery === '' || 
-                            (enchant.name && enchant.name.toLowerCase().includes(searchQuery)) || 
-                            (enchant.fullName && enchant.fullName.toLowerCase().includes(searchQuery));
+        const nameVal = enchant.name ? enchant.name.toLowerCase() : '';
+        const fullVal = enchant.fullName ? enchant.fullName.toLowerCase() : '';
+        const matchSearch = searchQuery === '' || nameVal.includes(searchQuery) || fullVal.includes(searchQuery);
+        
         return matchSlot && matchSearch;
     });
 }
@@ -212,7 +202,6 @@ function renderEnchantments() {
     const materialBtnGroup = document.getElementById('material-btn-group');
     const container = document.getElementById('enchant-list');
 
-    // 檢查是否有錯誤畫面，如果有則停止渲染
     const mainPanel = document.getElementById('main-action-panel');
     if (mainPanel && mainPanel.innerHTML.includes('無法讀取')) return;
 
@@ -220,14 +209,11 @@ function renderEnchantments() {
     const currentViewSlot = activeBtn ? activeBtn.dataset.slot : null;
     const activeItem = (typeof Cart !== 'undefined') ? Cart.getActiveItem() : null;
 
-    // 先全部隱藏
     if (stateEmpty) stateEmpty.style.display = 'none';
     if (stateMaterial) stateMaterial.style.display = 'none';
     if (stateEnchant) stateEnchant.style.display = 'none';
 
-    // ==========================================
     // 狀態 0：完全沒有選擇左側裝備
-    // ==========================================
     if (!currentViewSlot) {
         if (stateEmpty) stateEmpty.style.display = 'flex';
         return;
@@ -235,9 +221,7 @@ function renderEnchantments() {
 
     const slotName = (typeof Cart !== 'undefined' && Cart.slotNames[currentViewSlot]) ? Cart.slotNames[currentViewSlot] : currentViewSlot;
 
-    // ==========================================
-    // 狀態 1：已選左側裝備，但尚未建立/選擇材質 (分支畫面)
-    // ==========================================
+    // 狀態 1：已選左側裝備，但尚未建立材質
     if (!activeItem || activeItem.slot !== currentViewSlot) {
         if (stateMaterial) {
             stateMaterial.style.display = 'flex';
@@ -245,46 +229,32 @@ function renderEnchantments() {
             if (titleEl) titleEl.innerText = `選擇 ${slotName} 材質`;
             materialBtnGroup.innerHTML = '';
             
-            const createBtn = (text, baseName) => {
+            const createBtn = (text, matType) => {
                 const btn = document.createElement('button');
-                btn.style.cssText = 'background: var(--primary-color, #4a90e2); color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; font-size: 1.2rem; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.4); transition: transform 0.2s; min-width: 160px;';
+                btn.className = 'eq-btn'; 
+                btn.style.cssText = 'padding: 15px 30px; font-size: 1.2rem; min-width: 150px;';
                 btn.innerHTML = text;
-                btn.onmouseover = () => btn.style.transform = 'translateY(-3px)';
-                btn.onmouseout = () => btn.style.transform = 'translateY(0)';
                 btn.onclick = () => {
                     Cart.addEquipment(currentViewSlot);
-                    if (baseName) {
-                        const data = window.ENCHANTS_DATA || (typeof ENCHANTS !== 'undefined' ? ENCHANTS : []);
-                        const baseItem = data.find(e => e.name === baseName || e.fullName === baseName);
-                        if (baseItem) Cart.toggleEnchant(baseItem);
-                    }
-                    renderEnchantments(); // 建立後瞬間切換到狀態2
+                    const data = window.ENCHANTS_DATA || [];
+                    const baseItem = data.find(e => e.id >= 200 && Array.isArray(e.slots) && e.slots.includes(currentViewSlot) && e.name.includes(matType));
+                    if (baseItem) Cart.toggleEnchant(baseItem);
+                    
+                    renderEnchantments(); 
                     if (typeof showToast === 'function') showToast(`已建立 ${text}！`);
                 };
                 return btn;
             };
 
-            // 盔甲：顯示鑽石與獄髓按鈕
             if (['helmet', 'chestplate', 'leggings', 'boots'].includes(currentViewSlot)) {
-                materialBtnGroup.appendChild(createBtn(`鑽石${slotName}`, `鑽石${slotName}`));
-                materialBtnGroup.appendChild(createBtn(`獄髓${slotName}`, `獄髓${slotName}`));
-            } else {
-                // 防呆：如果是其他裝備且不小心把唯一一件刪除了，顯示手動建立按鈕
-                let baseName = null;
-                if (['sword', 'axe', 'pickaxe', 'shovel', 'hoe', 'mace', 'spear'].includes(currentViewSlot)) {
-                    baseName = `獄髓${slotName}`;
-                } else if (['trident', 'elytra', 'bow', 'crossbow', 'fishing'].includes(currentViewSlot)) {
-                    baseName = `${slotName}`;
-                }
-                materialBtnGroup.appendChild(createBtn(`建立 ${slotName}`, baseName));
+                materialBtnGroup.appendChild(createBtn(`鑽石${slotName}`, '鑽石'));
+                materialBtnGroup.appendChild(createBtn(`獄髓${slotName}`, '獄髓'));
             }
         }
-        return; // 攔截！絕對不渲染底下多餘的 UI
+        return; 
     }
 
-    // ==========================================
-    // 狀態 2：已建立裝備，展開附魔庫
-    // ==========================================
+    // 狀態 2：展開附魔庫
     if (stateEnchant) stateEnchant.style.display = 'block';
 
     let editingName = activeItem.name;
@@ -297,25 +267,22 @@ function renderEnchantments() {
     if (titleEl) {
         titleEl.innerHTML = `✨ 正在配置：<span style="color: #fff; margin-left: 8px;">${editingName}</span>`;
         
-        // 加入「建立另一件」按鈕，讓玩家可以買兩把劍
         let anotherBtn = document.getElementById('btn-add-another');
         if (!anotherBtn) {
             anotherBtn = document.createElement('button');
             anotherBtn.id = 'btn-add-another';
-            anotherBtn.style.cssText = 'background: transparent; color: var(--tab-active, #4a90e2); border: 2px solid var(--tab-active, #4a90e2); padding: 5px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: background 0.2s;';
+            anotherBtn.style.cssText = 'background: transparent; color: var(--tab-active); border: 2px solid var(--tab-active); padding: 5px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: 0.2s;';
             titleEl.parentNode.appendChild(anotherBtn);
         }
         anotherBtn.innerHTML = `➕ 建立另一件`;
-        anotherBtn.onmouseover = () => { anotherBtn.style.background = 'var(--tab-active, #4a90e2)'; anotherBtn.style.color = 'white'; };
-        anotherBtn.onmouseout = () => { anotherBtn.style.background = 'transparent'; anotherBtn.style.color = 'var(--tab-active, #4a90e2)'; };
+        anotherBtn.onmouseover = () => { anotherBtn.style.background = 'var(--tab-active)'; anotherBtn.style.color = 'white'; };
+        anotherBtn.onmouseout = () => { anotherBtn.style.background = 'transparent'; anotherBtn.style.color = 'var(--tab-active)'; };
         anotherBtn.onclick = () => {
-            // 點擊後清空焦點，強制畫面回到狀態 1 (建立分支)
             Cart.activeItemId = null; 
             renderEnchantments();
         };
     }
 
-    // 渲染卡片
     container.innerHTML = '';
     const list = getFilteredEnchants(currentViewSlot);
 
@@ -327,8 +294,6 @@ function renderEnchantments() {
     list.forEach(enchant => {
         const div = document.createElement('div');
         div.className = 'enchant-item';
-        div.style.position = 'relative';
-        div.style.overflow = 'hidden';
 
         const isSelected = activeItem && typeof Cart !== 'undefined' && Cart.isSelected(enchant.id);
         if (isSelected) div.classList.add('selected');
@@ -341,34 +306,19 @@ function renderEnchantments() {
 
         const isFav = (typeof StorageManager !== 'undefined') && StorageManager.isFavorite(enchant.id);
         const favIcon = isFav ? '★' : '☆';
-
         const hoverDescText = enchant.description ? enchant.description : '無特殊效果說明';
         
         div.innerHTML = `
             <span class="fav-icon" style="position: absolute; top: 6px; right: 6px; cursor: pointer; color: #f1c40f; font-size: 1.2rem; z-index: 10;">${favIcon}</span>
             <div class="name">${enchant.fullName}</div>
             <div class="rarity-label rarity-${enchant.rarity}">${enchant.rarity}</div>
-            <div class="price ${enchant.price >= 5000 ? 'expensive' : 'normal'}">$${enchant.price}</div>
+            <div class="price ${enchant.price >= 5000 ? 'expensive' : 'normal'}">$${typeof Calculator !== 'undefined' ? Calculator.formatPrice(enchant.price) : enchant.price}</div>
             
-            <div class="hover-overlay" style="
-                position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-                background: rgba(30, 30, 36, 0.95);
-                padding: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center;
-                opacity: 0; transition: opacity 0.25s ease; pointer-events: none; z-index: 5;
-            ">
-                <strong style="color: var(--tab-active, #4a90e2); font-size: 0.95rem; margin-bottom: 6px;">效果說明</strong>
+            <div class="hover-overlay">
+                <strong style="color: var(--tab-active); font-size: 0.95rem; margin-bottom: 6px;">效果說明</strong>
                 <span style="font-size: 0.85rem; color: #ccc; line-height: 1.5; text-align: center; word-break: break-all;">${hoverDescText}</span>
             </div>
         `;
-
-        div.onmouseenter = () => {
-            const overlay = div.querySelector('.hover-overlay');
-            if (overlay) overlay.style.opacity = '1';
-        };
-        div.onmouseleave = () => {
-            const overlay = div.querySelector('.hover-overlay');
-            if (overlay) overlay.style.opacity = '0';
-        };
 
         div.onclick = (e) => {
             if (e.target.classList.contains('fav-icon')) {
@@ -406,8 +356,5 @@ function showToast(message) {
     toast.innerText = message;
     
     container.appendChild(toast);
-
-    setTimeout(() => {
-        toast.remove();
-    }, 3000);
+    setTimeout(() => { toast.remove(); }, 3000);
 }
