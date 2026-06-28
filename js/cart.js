@@ -1,4 +1,4 @@
-// 購物車與裝備管理 (最終優化版：具名顯示、價格自動加總)
+// 購物車與裝備管理 (包含：數量調整、具名顯示、自備邏輯、總價計算)
 const Cart = {
     items: [],
     activeItemId: null,
@@ -44,24 +44,16 @@ const Cart = {
         if (typeof StorageManager !== 'undefined') StorageManager.saveCart(this.items);
     },
 
-    setActiveItem(id) {
-        this._ensureArray();
-        this.activeItemId = id;
-        this.render();
-    },
-
-    getActiveItem() {
-        this._ensureArray();
-        return this.items.find(item => item.id === this.activeItemId);
-    },
-
     updateQuantity(id, change) {
         this._ensureArray();
         const item = this.items.find(i => i.id === id);
         if (!item) return;
         let newQty = (item.quantity || 1) + change;
         if (newQty < 1) newQty = 1;
-        if (newQty > 3) newQty = 3;
+        if (newQty > 3) {
+            if (typeof showToast === 'function') showToast('數量上限為 3 件！');
+            newQty = 3;
+        }
         item.quantity = newQty;
         this.render();
         if (typeof StorageManager !== 'undefined') StorageManager.saveCart(this.items);
@@ -88,6 +80,11 @@ const Cart = {
         this.render();
     },
 
+    getActiveItem() {
+        this._ensureArray();
+        return this.items.find(item => item.id === this.activeItemId);
+    },
+
     getTotal() {
         this._ensureArray();
         let total = 0;
@@ -112,15 +109,25 @@ const Cart = {
             const contentBox = document.createElement('div');
             contentBox.style.cssText = 'background:#18181d; padding:15px; margin-bottom:10px; border-radius:10px; border:1px solid #444;';
             
-            contentBox.innerHTML = `<div style="font-weight:bold; color:#fff; border-bottom:1px solid #333; padding-bottom:5px;">${item.name} (x${qty})</div>`;
+            // 數量控制 UI
+            contentBox.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed #333; padding-bottom:10px; margin-bottom:10px;">
+                <div style="font-weight:bold; color:#fff;">${item.name}</div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <button onclick="Cart.updateQuantity('${item.id}', -1)">❮</button>
+                    <span>${qty}</span>
+                    <button onclick="Cart.updateQuantity('${item.id}', 1)">❯</button>
+                    <button style="color:red; margin-left:10px;" onclick="Cart.removeEquipment('${item.id}')">🗑️</button>
+                </div>
+            </div>`;
             
             let itemSubtotal = 0;
             item.enchants.forEach(e => {
                 itemSubtotal += e.price;
-                contentBox.innerHTML += `<div style="display:flex; justify-content:space-between; margin:3px 0; font-size:0.9rem;"><span>${e.fullName}</span><span>${e.price > 0 ? e.price : '自備'}</span></div>`;
+                const priceText = (e.id >= 200 && e.price === 0) ? '自備' : e.price;
+                contentBox.innerHTML += `<div style="display:flex; justify-content:space-between; margin:3px 0; font-size:0.9rem;"><span>${e.fullName}</span><span>${priceText}</span></div>`;
             });
             
-            contentBox.innerHTML += `<div style="border-top:1px solid #333; margin-top:5px; text-align:right;">小計: ${itemSubtotal * qty}</div>`;
+            contentBox.innerHTML += `<div style="border-top:1px solid #333; margin-top:5px; text-align:right; font-weight:bold;">小計 (x${qty}): ${itemSubtotal * qty}</div>`;
             container.appendChild(contentBox);
         });
     },
@@ -132,7 +139,8 @@ const Cart = {
             text += `=== ${item.name} (#${index + 1}) ===\n`;
             let itemTotal = 0;
             item.enchants.forEach(e => {
-                text += `${e.fullName}: ${e.price > 0 ? e.price : '自備'}\n`;
+                const priceText = (e.id >= 200 && e.price === 0) ? '自備' : e.price;
+                text += `${e.fullName}: ${priceText}\n`;
                 itemTotal += e.price;
             });
             text += `小計 (x${qty}): ${itemTotal * qty}\n\n`;
