@@ -1,4 +1,3 @@
-// 購物車與裝備管理 (精準名稱與價格顯示版)
 const Cart = {
     items: [],
     activeItemId: null,
@@ -27,6 +26,17 @@ const Cart = {
             quantity: 1,
             enchants: []
         };
+
+        // 自動帶入基底裝備與價格
+        if (typeof ENCHANTS !== 'undefined') {
+            // 尋找對應的基底項目 (ID > 200)
+            let baseItem = ENCHANTS.find(e => e.id > 200 && e.slots.includes(slot));
+            if (baseItem) {
+                newItem.name = baseItem.fullName; // 將顯示名稱改為具體裝備名
+                newItem.enchants.push(baseItem);  // 加入清單以便計價與顯示
+            }
+        }
+
         this.items.push(newItem);
         this.activeItemId = newItem.id;
         this.render();
@@ -51,92 +61,46 @@ const Cart = {
         this.render();
     },
 
-    getActiveItem() {
-        this._ensureArray();
-        return this.items.find(item => item.id === this.activeItemId);
-    },
-
-    toggleEnchant(enchant) {
-        let activeItem = this.getActiveItem();
-        if (!activeItem) return;
-
-        if (enchant.id >= 200) {
-            activeItem.enchants = activeItem.enchants.filter(e => e.id < 200);
-            activeItem.enchants.push(enchant);
-            activeItem.name = enchant.fullName.replace('【裝備】', '');
-        } else {
-            if (!enchant.slots.includes(activeItem.slot)) return;
-            const index = activeItem.enchants.findIndex(e => e.id === enchant.id);
-            if (index > -1) {
-                activeItem.enchants.splice(index, 1);
-            } else {
-                activeItem.enchants.push(enchant);
-            }
-        }
-        this.render();
-    },
-
     getTotal() {
         let total = 0;
         this.items.forEach(item => {
-            let basePrice = item.enchants.find(e => e.id >= 200)?.price || 0;
-            let enchantSum = item.enchants.filter(e => e.id < 200).reduce((sum, e) => sum + e.price, 0);
-            total += (basePrice + enchantSum) * (item.quantity || 1);
+            let itemSum = item.enchants.reduce((s, e) => s + e.price, 0);
+            total += itemSum * (item.quantity || 1);
         });
         return total;
     },
 
     render() {
         const container = document.getElementById('selected-list');
+        if (!container) return;
         container.innerHTML = '';
-        if (document.getElementById('total-price-value')) document.getElementById('total-price-value').innerText = this.getTotal();
+        
+        if (document.getElementById('total-price-value')) {
+            document.getElementById('total-price-value').innerText = this.getTotal();
+        }
 
         this.items.forEach((item, index) => {
             const box = document.createElement('div');
-            box.style.cssText = 'background:#18181d; padding:15px; margin:10px; border:1px solid #444;';
+            box.style.cssText = 'background:#18181d; padding:15px; margin:10px; border:1px solid #444; color:#fff;';
             
-            // 頂部導航與控制
             box.innerHTML = `
-                <div style="margin-bottom:10px;">
-                    <button onclick="Cart.setActiveItem('${this.items[Math.max(0, index-1)].id}')">◀</button>
-                    <strong>${item.name} (x${item.quantity})</strong>
-                    <button onclick="Cart.setActiveItem('${this.items[Math.min(this.items.length-1, index+1)].id}')">▶</button>
-                    <button onclick="Cart.updateQuantity('${item.id}', -1)">❮</button>
-                    <button onclick="Cart.updateQuantity('${item.id}', 1)">❯</button>
-                    <button onclick="Cart.removeEquipment('${item.id}')">🗑️</button>
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:5px;">
+                    <span style="font-weight:bold;">${item.name} (x${item.quantity})</span>
+                    <div>
+                        <button onclick="Cart.updateQuantity('${item.id}', -1)">❮</button>
+                        <button onclick="Cart.updateQuantity('${item.id}', 1)">❯</button>
+                        <button style="margin-left:10px; color:red;" onclick="Cart.removeEquipment('${item.id}')">🗑️</button>
+                    </div>
                 </div>`;
             
-            // 顯示基底名稱與價格
-            const base = item.enchants.find(e => e.id >= 200);
-            const baseName = base ? base.fullName : '未選裝備';
-            const basePrice = base ? (base.price > 0 ? base.price : '自備') : 0;
-            box.innerHTML += `<div>${baseName}: ${basePrice}</div>`;
-
-            // 附魔清單
-            item.enchants.filter(e => e.id < 200).forEach(e => {
-                box.innerHTML += `<div>${e.fullName}: ${e.price}</div>`;
+            item.enchants.forEach(e => {
+                box.innerHTML += `
+                    <div style="display:flex; justify-content:space-between; font-size:0.9rem; margin:3px 0;">
+                        <span>${e.fullName}</span>
+                        <span>${e.price > 0 ? e.price : '自備'}</span>
+                    </div>`;
             });
             container.appendChild(box);
         });
-    },
-
-    generateQuoteText() {
-        let text = '【Minecraft 附魔報價單】\n\n';
-        this.items.forEach((item, index) => {
-            text += `=== ${item.name} (#${index + 1}) ===\n`;
-            const base = item.enchants.find(e => e.id >= 200);
-            const basePrice = base ? (base.price > 0 ? base.price : '自備') : 0;
-            text += `${base ? base.fullName : '未選裝備'}: ${basePrice}\n`;
-            
-            let itemTotal = 0;
-            item.enchants.filter(e => e.id < 200).forEach(e => {
-                text += `${e.fullName}: ${e.price}\n`;
-                itemTotal += e.price;
-            });
-            const baseVal = base ? base.price : 0;
-            text += `小計 (x${item.quantity || 1}): ${(baseVal + itemTotal) * (item.quantity || 1)}\n\n`;
-        });
-        text += `總金額: ${this.getTotal()}`;
-        return text;
     }
 };
