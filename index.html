@@ -1,120 +1,117 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minecraft 附魔報價系統</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
-    <div class="app-container">
-        <div class="panel-left">
-            <button class="eq-btn" data-slot="helmet" onclick="Cart.addEquipment('helmet')">頭盔</button>
-            <button class="eq-btn" data-slot="chestplate" onclick="Cart.addEquipment('chestplate')">胸甲</button>
-            <button class="eq-btn" data-slot="leggings" onclick="Cart.addEquipment('leggings')">護腿</button>
-            <button class="eq-btn" data-slot="boots" onclick="Cart.addEquipment('boots')">靴子</button>
-            <button class="eq-btn" data-slot="sword" onclick="Cart.addEquipment('sword')">劍</button>
-            <button class="eq-btn" data-slot="pickaxe" onclick="Cart.addEquipment('pickaxe')">鎬</button>
-            <button class="eq-btn" data-slot="axe" onclick="Cart.addEquipment('axe')">斧</button>
-            <button class="eq-btn" data-slot="shovel" onclick="Cart.addEquipment('shovel')">鏟</button>
-            <button class="eq-btn" data-slot="hoe" onclick="Cart.addEquipment('hoe')">鋤</button>
-            <button class="eq-btn" data-slot="mace" onclick="Cart.addEquipment('mace')">重錘</button>
-            <button class="eq-btn" data-slot="spear" onclick="Cart.addEquipment('spear')">長矛</button>
-            <button class="eq-btn" data-slot="trident" onclick="Cart.addEquipment('trident')">三叉戟</button>
-            <button class="eq-btn" data-slot="bow" onclick="Cart.addEquipment('bow')">弓</button>
-            <button class="eq-btn" data-slot="crossbow" onclick="Cart.addEquipment('crossbow')">弩</button>
-            <button class="eq-btn" data-slot="fishing" onclick="Cart.addEquipment('fishing')">釣竿</button>
-            <button class="eq-btn" data-slot="elytra" onclick="Cart.addEquipment('elytra')">鞘翅</button>
-        </div>
-        <div id="selected-list"></div>
-        <div id="total-price-value">0</div>
+    <div class="container">
+        <header class="header">
+            <h1>Minecraft 附魔報價系統</h1>
+        </header>
+
+        <main class="layout-grid">
+            <section class="panel equipment-panel">
+                <h2>挑選裝備</h2>
+                <div class="equipment-list" id="equipment-list">
+                    <button class="eq-btn" data-slot="helmet">頭盔</button>
+                    <button class="eq-btn" data-slot="chestplate">胸甲</button>
+                    <button class="eq-btn" data-slot="leggings">護腿</button>
+                    <button class="eq-btn" data-slot="boots">靴子</button>
+                    <button class="eq-btn" data-slot="elytra">鞘翅</button>
+                    <button class="eq-btn" data-slot="sword">劍</button>
+                    <button class="eq-btn" data-slot="axe">斧</button>
+                    <button class="eq-btn" data-slot="pickaxe">鎬</button>
+                    <button class="eq-btn" data-slot="shovel">鏟</button>
+                    <button class="eq-btn" data-slot="hoe">鋤</button>
+                    <button class="eq-btn" data-slot="bow">弓</button>
+                    <button class="eq-btn" data-slot="crossbow">弩</button>
+                    <button class="eq-btn" data-slot="trident">三叉戟</button>
+                    <button class="eq-btn" data-slot="fishing">釣竿</button>
+                </div>
+            </section>
+
+            <section class="panel enchant-panel" id="main-action-panel">
+                <h2>配置面板</h2>
+
+                <div id="state-empty"
+                    style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80%; color: #888;">
+                    <div style="font-size: 4rem; margin-bottom: 20px; opacity: 0.5;">👈</div>
+                    <h3>請先從左側選擇一個裝備項目</h3>
+                    <p style="margin-top: 10px; font-size: 0.9rem;">盔甲將進入材質選擇分支，工具與武器將直接展開附魔</p>
+                </div>
+
+                <div id="state-material"
+                    style="display: none; flex-direction: column; align-items: center; justify-content: center; height: 80%;">
+                    <h3 id="material-title" style="color: var(--tab-active); margin-bottom: 10px; font-size: 1.5rem;">
+                        選擇材質</h3>
+                    <p style="color: #aaa; margin-bottom: 30px;">請選擇您要建立的裝備材質</p>
+                    <div id="material-btn-group" style="display: flex; gap: 20px;">
+                    </div>
+                </div>
+
+                <div id="state-enchant" style="display: none;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+                        <h3 id="enchant-target-title" style="color: var(--tab-active); margin: 0; font-size: 1.2rem;">✨
+                            正在配置：</h3>
+                    </div>
+
+                    <div class="search-bar">
+                        <input type="text" id="search-input" placeholder="搜尋附魔...">
+                    </div>
+
+                    <div class="category-tabs" id="category-tabs">
+                        <button class="tab-btn active" data-category="普通">普通附魔</button>
+                        <button class="tab-btn" data-category="特殊">特殊附魔</button>
+                        <button class="tab-btn" data-category="收藏">⭐ 收藏</button>
+                        <button class="tab-btn" data-category="最近">🕒 最近</button>
+                    </div>
+
+                    <div class="enchant-list" id="enchant-list">
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel cart-panel">
+                <h2>已選報價單</h2>
+                <div class="selected-list" id="selected-list"
+                    style="border: none; background: transparent; padding: 0;">
+                </div>
+
+                <div class="summary-box">
+                    <div class="total-price">
+                        總價：<span id="total-price-value">0</span>
+                    </div>
+                    <div class="action-buttons">
+                        <button id="btn-clear" class="btn btn-danger">清空</button>
+                        <button id="btn-copy" class="btn btn-primary">複製報價</button>
+                    </div>
+                    <div class="action-buttons" style="margin-top: 10px;">
+                        <button id="btn-export-txt" class="btn" style="background-color: #3a3a45; color: #ccc;">匯出
+                            TXT</button>
+                        <button id="btn-export-json" class="btn" style="background-color: #3a3a45; color: #ccc;">匯出
+                            JSON</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <div id="toast-container" class="toast-container"></div>
     </div>
-    <script src="js/cart.js"></script>
+
+    <script src="js/data.js"></script>
+    <script src="js/storage.js"></script>
     <script src="js/calculator.js"></script>
+    <script src="js/search.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/export.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
 </body>
+
 </html>
-```(￣∇￣)
-
-### 修改檔案：`js/cart.js`
-```javascript
-const Cart = {
-    items: [],
-    activeItemId: null,
-
-    get slotNames() {
-        return {
-            helmet: '頭盔', chestplate: '胸甲', leggings: '護腿', boots: '靴子',
-            elytra: '鞘翅', sword: '劍', axe: '斧', mace: '重錘', spear: '長矛', pickaxe: '鎬', shovel: '鏟',
-            hoe: '鋤', bow: '弓', crossbow: '弩', trident: '三叉戟', fishing: '釣竿'
-        };
-    },
-
-    addEquipment(slot) {
-        if (!Array.isArray(this.items)) this.items = [];
-        const newItem = {
-            id: 'eq_' + Date.now(),
-            slot: slot,
-            name: this.slotNames[slot] || slot,
-            quantity: 1,
-            enchants: []
-        };
-        this.items.push(newItem);
-        this.activeItemId = newItem.id;
-        this.render();
-    },
-
-    removeEquipment(id) {
-        this.items = this.items.filter(i => i.id !== id);
-        this.activeItemId = this.items.length > 0 ? this.items[0].id : null;
-        this.render();
-    },
-
-    updateQuantity(id, change) {
-        const item = this.items.find(i => i.id === id);
-        if (item) {
-            item.quantity = Math.max(1, Math.min(3, (item.quantity || 1) + change));
-            this.render();
-        }
-    },
-
-    setActiveItem(id) {
-        this.activeItemId = id;
-        this.render();
-    },
-
-    getTotal() {
-        let total = 0;
-        this.items.forEach(item => {
-            let itemSum = item.enchants.reduce((s, e) => s + e.price, 0);
-            total += itemSum * (item.quantity || 1);
-        });
-        return total;
-    },
-
-    render() {
-        const container = document.getElementById('selected-list');
-        container.innerHTML = '';
-        if (document.getElementById('total-price-value')) document.getElementById('total-price-value').innerText = this.getTotal();
-
-        this.items.forEach((item, index) => {
-            const box = document.createElement('div');
-            box.style.cssText = 'background:#18181d; padding:15px; margin:10px; border:1px solid #444;';
-            box.innerHTML = `
-                <div>${item.name} (x${item.quantity}) 
-                    <button onclick="Cart.updateQuantity('${item.id}', -1)">❮</button>
-                    <button onclick="Cart.updateQuantity('${item.id}', 1)">❯</button>
-                    <button onclick="Cart.removeEquipment('${item.id}')">🗑️</button>
-                </div>`;
-            item.enchants.forEach(e => {
-                box.innerHTML += `<div>${e.fullName}: ${e.price > 0 ? e.price : '自備'}</div>`;
-            });
-            container.appendChild(box);
-        });
-    }
-};
-```(￣∇￣)
-
-### 修改檔案：`js/calculator.js`
-```javascript
-const Calculator = {
-    formatPrice: (price) => price.toLocaleString()
-};
