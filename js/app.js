@@ -79,9 +79,20 @@ function bindEvents() {
                         // 【盔甲分支】：清空焦點，強制觸發 State 1（材質二選一）
                         Cart.activeItemId = null;
                     } else {
-                        // 【工具/武器分支】：自動建立並套用獄髓，直接進入 State 2（附魔庫）
+                        // 【工具/武器/其他裝備分支】：自動建立對應基底，直接進入 State 2（附魔庫）
                         Cart.addEquipment(slot);
-                        let baseName = ['sword', 'axe', 'pickaxe', 'shovel', 'hoe'].includes(slot) ? `【獄髓${Cart.slotNames[slot] || slot}】` : null;
+                        let baseName = null;
+                        const slotName = Cart.slotNames[slot] || slot;
+                        
+                        // 判斷是否為預設需要冠上「獄髓」的裝備
+                        if (['sword', 'axe', 'pickaxe', 'shovel', 'hoe', 'mace', 'spear'].includes(slot)) {
+                            baseName = `【獄髓${slotName}】`;
+                        } 
+                        // 判斷是否為獨立原味裝備（無材質前綴）
+                        else if (['trident', 'elytra', 'bow', 'crossbow', 'fishing'].includes(slot)) {
+                            baseName = `【${slotName}】`;
+                        }
+
                         if (baseName) {
                             const baseItem = ENCHANTS.find(en => en.name === baseName);
                             if (baseItem) Cart.toggleEnchant(baseItem);
@@ -248,8 +259,13 @@ function renderEnchantments() {
                 materialBtnGroup.appendChild(createBtn(`鑽石${slotName}`, `【鑽石${slotName}】`));
                 materialBtnGroup.appendChild(createBtn(`獄髓${slotName}`, `【獄髓${slotName}】`));
             } else {
-                // 防呆：如果是工具且不小心把唯一一把刪除了，顯示建立按鈕
-                let baseName = ['sword', 'axe', 'pickaxe', 'shovel', 'hoe'].includes(currentViewSlot) ? `【獄髓${slotName}】` : null;
+                // 防呆：如果是其他裝備且不小心把唯一一件刪除了，顯示手動建立按鈕
+                let baseName = null;
+                if (['sword', 'axe', 'pickaxe', 'shovel', 'hoe', 'mace', 'spear'].includes(currentViewSlot)) {
+                    baseName = `【獄髓${slotName}】`;
+                } else if (['trident', 'elytra', 'bow', 'crossbow', 'fishing'].includes(currentViewSlot)) {
+                    baseName = `【${slotName}】`;
+                }
                 materialBtnGroup.appendChild(createBtn(`建立 ${slotName}`, baseName));
             }
         }
