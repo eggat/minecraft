@@ -1,88 +1,58 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minecraft 附魔報價系統</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <h1>Minecraft 附魔報價系統</h1>
-        </header>
-        
-        <main class="layout-grid">
-            <section class="panel equipment-panel">
-                <h2>挑選裝備</h2>
-                <div class="equipment-list" id="equipment-list">
-                    <button class="eq-btn" data-slot="helmet">頭盔</button>
-                    <button class="eq-btn" data-slot="chestplate">胸甲</button>
-                    <button class="eq-btn" data-slot="leggings">護腿</button>
-                    <button class="eq-btn" data-slot="boots">靴子</button>
-                    <button class="eq-btn" data-slot="elytra">鞘翅</button>
-                    <button class="eq-btn" data-slot="sword">劍</button>
-                    <button class="eq-btn" data-slot="axe">斧</button>
-                    <button class="eq-btn" data-slot="mace">重錘</button>
-                    <button class="eq-btn" data-slot="spear">長矛</button>
-                    <button class="eq-btn" data-slot="pickaxe">鎬</button>
-                    <button class="eq-btn" data-slot="shovel">鏟</button>
-                    <button class="eq-btn" data-slot="hoe">鋤</button>
-                    <button class="eq-btn" data-slot="bow">弓</button>
-                    <button class="eq-btn" data-slot="crossbow">弩</button>
-                    <button class="eq-btn" data-slot="trident">三叉戟</button>
-                    <button class="eq-btn" data-slot="fishing">釣竿</button>
-                </div>
-            </section>
+    <div class="app-container">
+        <div class="panel-left">
+            <button class="eq-btn" data-slot="helmet" onclick="Cart.addEquipment('helmet')">頭盔</button>
+            <button class="eq-btn" data-slot="chestplate" onclick="Cart.addEquipment('chestplate')">胸甲</button>
+            <button class="eq-btn" data-slot="leggings" onclick="Cart.addEquipment('leggings')">護腿</button>
+            <button class="eq-btn" data-slot="boots" onclick="Cart.addEquipment('boots')">靴子</button>
+            <button class="eq-btn" data-slot="sword" onclick="Cart.addEquipment('sword')">劍</button>
+            <button class="eq-btn" data-slot="pickaxe" onclick="Cart.addEquipment('pickaxe')">鎬</button>
+            <button class="eq-btn" data-slot="axe" onclick="Cart.addEquipment('axe')">斧</button>
+            <button class="eq-btn" data-slot="shovel" onclick="Cart.addEquipment('shovel')">鏟</button>
+            <button class="eq-btn" data-slot="hoe" onclick="Cart.addEquipment('hoe')">鋤</button>
+            <button class="eq-btn" data-slot="mace" onclick="Cart.addEquipment('mace')">重錘</button>
+            <button class="eq-btn" data-slot="spear" onclick="Cart.addEquipment('spear')">長矛</button>
+            <button class="eq-btn" data-slot="trident" onclick="Cart.addEquipment('trident')">三叉戟</button>
+            <button class="eq-btn" data-slot="bow" onclick="Cart.addEquipment('bow')">弓</button>
+            <button class="eq-btn" data-slot="crossbow" onclick="Cart.addEquipment('crossbow')">弩</button>
+            <button class="eq-btn" data-slot="fishing" onclick="Cart.addEquipment('fishing')">釣竿</button>
+            <button class="eq-btn" data-slot="elytra" onclick="Cart.addEquipment('elytra')">鞘翅</button>
+        </div>
 
-            <section class="panel enchant-panel" id="main-action-panel">
-                <h2>配置面板</h2>
-                <div id="state-empty" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80%; color: #888;">
-                    <div style="font-size: 4rem; margin-bottom: 20px; opacity: 0.5;">👈</div>
-                    <h3>請先從左側選擇一個裝備項目</h3>
-                </div>
-                <div id="state-material" style="display: none; flex-direction: column; align-items: center; justify-content: center; height: 80%;">
-                    <h3 id="material-title" style="color: var(--tab-active); margin-bottom: 30px; font-size: 1.5rem;">選擇材質</h3>
-                    <div id="material-btn-group" style="display: flex; gap: 20px;"></div>
-                </div>
-                <div id="state-enchant" style="display: none;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-                        <h3 id="enchant-target-title" style="color: var(--tab-active); margin: 0; font-size: 1.2rem;">✨ 正在配置：</h3>
-                    </div>
-                    <div class="search-bar"><input type="text" id="search-input" placeholder="搜尋附魔..."></div>
-                    <div class="category-tabs" id="category-tabs">
-                        <button class="tab-btn active" data-category="普通">普通附魔</button>
-                        <button class="tab-btn" data-category="特殊">特殊附魔</button>
-                    </div>
-                    <div class="enchant-list" id="enchant-list"></div>
-                </div>
-            </section>
+        <div class="panel-center">
+            <div id="enchant-list" style="overflow-y: auto; height: 85vh;">
+                <div style="text-align: center; color: #888; padding: 40px; font-size: 1.2rem;">請先從左側選擇要附魔的裝備</div>
+            </div>
+        </div>
 
-            <section class="panel cart-panel">
-                <h2>已選報價單</h2>
-                <div class="selected-list" id="selected-list"></div>
-                <div class="summary-box">
-                    <div class="total-price">總價：<span id="total-price-value">0</span></div>
-                    <div class="action-buttons">
-                        <button id="btn-clear" class="btn btn-danger">清空</button>
-                        <button id="btn-copy" class="btn btn-primary">複製報價</button>
-                    </div>
-                    <div class="action-buttons" style="margin-top: 10px;">
-                        <button id="btn-export-txt" class="btn" style="background-color: #3a3a45;">匯出 TXT</button>
-                        <button id="btn-export-json" class="btn" style="background-color: #3a3a45;">匯出 JSON</button>
-                    </div>
-                </div>
-            </section>
-        </main>
-        <div id="toast-container" class="toast-container"></div>
+        <div class="panel-right">
+            <div id="selected-list" style="overflow-y: auto; height: 75vh;"></div>
+            
+            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #444; display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: bold; color: #fff;">
+                <span>總金額:</span>
+                <span id="total-price-value" style="color: var(--price-expensive, #ff9800);">0</span>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button onclick="if(typeof exportTXT === 'function') exportTXT();" style="flex: 1; padding: 10px; background: #333; color: #fff; border: none; border-radius: 5px; cursor: pointer; transition: 0.2s;">匯出 TXT</button>
+                <button onclick="if(typeof exportJSON === 'function') exportJSON();" style="flex: 1; padding: 10px; background: #333; color: #fff; border: none; border-radius: 5px; cursor: pointer; transition: 0.2s;">匯出 JSON</button>
+            </div>
+        </div>
     </div>
+
     <script src="js/data.js"></script>
-    <script src="js/storage.js"></script>
     <script src="js/calculator.js"></script>
-    <script src="js/search.js"></script>
+    <script src="js/storage.js"></script>
     <script src="js/cart.js"></script>
-    <script src="js/export.js"></script>
-    <script src="js/api.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/export.js"></script>
+    <script src="js/search.js"></script>
 </body>
 </html>
