@@ -1,5 +1,5 @@
 [
-    {"id": 1, "name": "風爆", "level": "III", "fullName": "風爆(Wind Burst)III", "price": 50000, "rarity": "普通", "slots": ["mace"], "description": "擊中目標時引發風爆將玩家向上彈起", "incompatible": []},
+    {"id": 1, "name": "風爆", "level": "III", "fullName": "風爆(Wind Burst)III", "price": 150000, "rarity": "普通", "slots": ["mace"], "description": "擊中目標時引發風爆將玩家向上彈起", "incompatible": []},
     {"id": 2, "name": "迅捷潛行", "level": "III", "fullName": "迅捷潛行(Swift Sneak)III", "price": 10000, "rarity": "普通", "slots": ["leggings"], "description": "大幅提升潛行時的移動速度", "incompatible": []},
     {"id": 3, "name": "靈魂疾走", "level": "III", "fullName": "靈魂疾走(Soul Speed)III", "price": 10000, "rarity": "普通", "slots": ["boots"], "description": "在靈魂沙或靈魂土上移動時提升速度", "incompatible": []},
     {"id": 4, "name": "經驗修補", "level": "", "fullName": "經驗修補(Mending)", "price": 1500, "rarity": "普通", "slots": ["helmet", "chestplate", "leggings", "boots", "elytra", "sword", "axe", "mace", "spear", "pickaxe", "shovel", "hoe", "bow", "crossbow", "trident", "fishing"], "description": "吸收經驗球來恢復裝備的耐久度", "incompatible": ["無限(Infinity)"]},
