@@ -1,4 +1,4 @@
-// 購物車與多件裝備狀態管理 (含箭頭數量選擇器與全域特殊附魔唯一性判定 - 方案 B)
+// 購物車與多件裝備狀態管理 (含箭頭數量選擇器與全域特殊附魔唯一性判定 - 專業報價版)
 const Cart = {
     items: [],
     activeItemId: null,
@@ -24,7 +24,7 @@ const Cart = {
             id: 'eq_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
             slot: slot,
             name: this.slotNames[slot] || slot,
-            quantity: 1, // 預設數量為 1
+            quantity: 1,
             enchants: []
         };
         this.items.push(newItem);
@@ -55,7 +55,6 @@ const Cart = {
         return this.items.find(item => item.id === this.activeItemId);
     },
 
-    // 更新數量的功能 (限制 1~3 件)
     updateQuantity(id, change) {
         this._ensureArray();
         const item = this.items.find(i => i.id === id);
@@ -101,14 +100,12 @@ const Cart = {
         const activeItem = this.getActiveItem();
         if (!activeItem) return false;
 
-        // 1. 同一件裝備內的互斥判定
         const isLocalIncompatible = activeItem.enchants.some(selected => 
             (selected.incompatible && selected.incompatible.includes(enchant.name)) ||
             (enchant.incompatible && enchant.incompatible.includes(selected.name))
         );
         if (isLocalIncompatible) return true;
 
-        // 2. 全域特殊附魔排斥：只檢查「其他裝備」是否有此特殊附魔
         if (enchant.rarity === '特殊') {
             const isAlreadyInOtherItem = this.items.some(item => 
                 item.id !== activeItem.id && item.enchants.some(e => e.id === enchant.id)
@@ -131,7 +128,7 @@ const Cart = {
         this.items.forEach(item => {
             let itemTotal = 0;
             item.enchants.forEach(e => itemTotal += e.price);
-            total += itemTotal * (item.quantity || 1); // 總價計算加入數量乘數
+            total += itemTotal * (item.quantity || 1);
         });
         return total;
     },
@@ -161,7 +158,6 @@ const Cart = {
         const currentItem = this.items[currentIndex];
         const qtyStr = currentItem.quantity || 1;
 
-        // 1. 頂部裝備切換導航
         const navHeader = document.createElement('div');
         navHeader.style.cssText = 'display: flex; align-items: center; justify-content: space-between; background: #22222b; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid var(--border-color);';
 
@@ -193,110 +189,69 @@ const Cart = {
         navHeader.appendChild(nextBtn);
         container.appendChild(navHeader);
 
-        // 2. 裝備內容區塊
         const contentBox = document.createElement('div');
         contentBox.style.cssText = 'background: #18181d; padding: 15px; border-radius: 10px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px;';
         
-        // 2.1 控制列 (箭頭數量調整 + 捨棄按鈕)
         const controlRow = document.createElement('div');
-        controlRow.style.cssText = 'display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--border-color); padding-bottom: 12px; margin-bottom: 5px;';
+        controlRow.style.cssText = 'display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--border-color); padding-bottom: 12px;';
         
-        // 箭頭數量選擇器
         const qtyContainer = document.createElement('div');
         qtyContainer.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+        qtyContainer.innerHTML = `<span style="color:#aaa; font-size:0.9rem;">數量:</span>`;
         
-        const qtyLabel = document.createElement('span');
-        qtyLabel.innerText = '數量:';
-        qtyLabel.style.cssText = 'color: #aaa; font-size: 0.9rem;';
-
         const qtyBox = document.createElement('div');
-        qtyBox.style.cssText = 'display: flex; align-items: center; background: #25252d; border-radius: 6px; border: 1px solid var(--border-color); overflow: hidden;';
+        qtyBox.style.cssText = 'display: flex; align-items: center; background: #25252d; border-radius: 6px; border: 1px solid var(--border-color);';
         
         const btnMinus = document.createElement('button');
         btnMinus.innerHTML = '❮';
-        btnMinus.style.cssText = `background: transparent; color: ${qtyStr > 1 ? '#aaa' : '#444'}; border: none; padding: 4px 12px; cursor: ${qtyStr > 1 ? 'pointer' : 'not-allowed'}; font-size: 1rem; transition: 0.2s;`;
-        if (qtyStr > 1) {
-            btnMinus.onmouseover = () => btnMinus.style.background = '#333';
-            btnMinus.onmouseout = () => btnMinus.style.background = 'transparent';
-            btnMinus.onclick = () => this.updateQuantity(currentItem.id, -1);
-        }
+        btnMinus.style.cssText = `background:transparent; color:${qtyStr > 1 ? '#aaa' : '#444'}; border:none; padding:4px 10px; cursor:${qtyStr > 1 ? 'pointer' : 'not-allowed'}; font-size:1rem;`;
+        if (qtyStr > 1) btnMinus.onclick = () => this.updateQuantity(currentItem.id, -1);
 
         const spanQty = document.createElement('span');
         spanQty.innerText = qtyStr;
-        spanQty.style.cssText = 'color: #fff; font-weight: bold; padding: 0 15px; font-size: 1rem; text-align: center; min-width: 40px; border-left: 1px solid #333; border-right: 1px solid #333;';
+        spanQty.style.cssText = 'color:#fff; font-weight:bold; padding:0 12px; border-left:1px solid #333; border-right:1px solid #333;';
 
         const btnPlus = document.createElement('button');
         btnPlus.innerHTML = '❯';
-        btnPlus.style.cssText = `background: transparent; color: ${qtyStr < 3 ? '#aaa' : '#444'}; border: none; padding: 4px 12px; cursor: ${qtyStr < 3 ? 'pointer' : 'not-allowed'}; font-size: 1rem; transition: 0.2s;`;
-        if (qtyStr < 3) {
-            btnPlus.onmouseover = () => btnPlus.style.background = '#333';
-            btnPlus.onmouseout = () => btnPlus.style.background = 'transparent';
-            btnPlus.onclick = () => this.updateQuantity(currentItem.id, 1);
-        }
+        btnPlus.style.cssText = `background:transparent; color:${qtyStr < 3 ? '#aaa' : '#444'}; border:none; padding:4px 10px; cursor:${qtyStr < 3 ? 'pointer' : 'not-allowed'}; font-size:1rem;`;
+        if (qtyStr < 3) btnPlus.onclick = () => this.updateQuantity(currentItem.id, 1);
 
-        qtyBox.appendChild(btnMinus);
-        qtyBox.appendChild(spanQty);
-        qtyBox.appendChild(btnPlus);
-        qtyContainer.appendChild(qtyLabel);
+        qtyBox.appendChild(btnMinus); qtyBox.appendChild(spanQty); qtyBox.appendChild(btnPlus);
         qtyContainer.appendChild(qtyBox);
-
-        // 捨棄按鈕
-        const btnRemove = document.createElement('button');
-        btnRemove.innerHTML = '🗑️ 捨棄裝備';
-        btnRemove.style.cssText = 'background: transparent; color: var(--danger-color); border: 1px solid var(--danger-color); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; transition: 0.2s;';
-        btnRemove.onmouseover = () => { btnRemove.style.background = 'var(--danger-color)'; btnRemove.style.color = 'white'; };
-        btnRemove.onmouseout = () => { btnRemove.style.background = 'transparent'; btnRemove.style.color = 'var(--danger-color)'; };
-        btnRemove.onclick = () => { this.removeEquipment(currentItem.id); if(typeof renderEnchantments === 'function') renderEnchantments(); };
-
         controlRow.appendChild(qtyContainer);
+
+        const btnRemove = document.createElement('button');
+        btnRemove.innerHTML = '🗑️';
+        btnRemove.style.cssText = 'background:transparent; color:var(--danger-color); border:1px solid var(--danger-color); padding:5px 8px; border-radius:6px; cursor:pointer;';
+        btnRemove.onclick = () => { this.removeEquipment(currentItem.id); renderEnchantments(); };
         controlRow.appendChild(btnRemove);
         contentBox.appendChild(controlRow);
 
-        // 2.2 附魔清單
         const enchantListDiv = document.createElement('div');
         let enchantsTotal = 0;
         const displayEnchants = currentItem.enchants.filter(e => e.id < 200);
 
-        if (displayEnchants.length === 0 && basePrice === 0) {
-            enchantListDiv.innerHTML = '<div style="color: #666; text-align: center; padding: 20px 0; font-size: 0.85rem;">尚未添加附魔</div>';
-        } else {
-            displayEnchants.forEach(enchant => {
-                enchantsTotal += enchant.price;
-                const enDiv = document.createElement('div');
-                enDiv.style.cssText = 'background: #25252d; padding: 8px 12px; margin: 6px 0; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid var(--primary-color);';
-                enDiv.innerHTML = `
-                    <div>
-                        <div style="font-weight: bold; color: #f5f5f5; font-size: 0.95rem;">${enchant.fullName}</div>
-                        <div style="font-size: 0.8rem; color: var(--price-normal); margin-top: 2px;">$${enchant.price}</div>
-                    </div>
-                    <button style="background:none; border:none; color:var(--danger-color); cursor:pointer; font-size: 1.4rem; padding: 0 5px;" title="移除此附魔">&times;</button>`;
-                enDiv.querySelector('button').onclick = () => { this.toggleEnchant(enchant); if(typeof renderEnchantments === 'function') renderEnchantments(); };
-                enchantListDiv.appendChild(enDiv);
-            });
-        }
+        // 顯示基底價格 (即使為 0)
+        enchantListDiv.innerHTML = `<div style="color:var(--price-normal); font-size:0.85rem; padding:5px 0;">基本裝備費用: ${typeof Calculator !== 'undefined' ? Calculator.formatPrice(basePrice) : basePrice}</div>`;
+
+        displayEnchants.forEach(enchant => {
+            enchantsTotal += enchant.price;
+            const enDiv = document.createElement('div');
+            enDiv.style.cssText = 'background:#25252d; padding:8px; margin:5px 0; border-radius:4px; display:flex; justify-content:space-between; align-items:center; border-left:3px solid var(--primary-color);';
+            enDiv.innerHTML = `<div style="font-size:0.9rem;">${enchant.fullName} <span style="color:var(--price-normal); font-size:0.8rem;">($${enchant.price})</span></div><button style="background:none; border:none; color:var(--danger-color); cursor:pointer;">&times;</button>`;
+            enDiv.querySelector('button').onclick = () => { this.toggleEnchant(enchant); renderEnchantments(); };
+            enchantListDiv.appendChild(enDiv);
+        });
         contentBox.appendChild(enchantListDiv);
 
-        // 2.3 小計結算區
-        const singleTotal = basePrice + enchantsTotal;
-        const groupTotal = singleTotal * qtyStr;
-
         const subtotalDiv = document.createElement('div');
-        subtotalDiv.style.cssText = 'margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: flex-end;';
-        subtotalDiv.innerHTML = `
-            <div style="color: #aaa; font-size: 0.85rem; line-height: 1.5;">
-                單件金額: ${typeof Calculator !== 'undefined' ? Calculator.formatPrice(singleTotal) : singleTotal}<br>
-                採購數量: <strong>x ${qtyStr}</strong>
-            </div>
-            <div style="color: var(--price-normal); font-weight: bold; font-size: 1.3rem;">
-                ${typeof Calculator !== 'undefined' ? Calculator.formatPrice(groupTotal) : groupTotal}
-            </div>
-        `;
+        subtotalDiv.style.cssText = 'padding-top:10px; border-top:1px solid #333; text-align:right; font-weight:bold;';
+        subtotalDiv.innerHTML = `小計 (x${qtyStr}): <span style="color:var(--price-expensive); font-size:1.2rem;">${typeof Calculator !== 'undefined' ? Calculator.formatPrice((basePrice + enchantsTotal) * qtyStr) : (basePrice + enchantsTotal) * qtyStr}</span>`;
         contentBox.appendChild(subtotalDiv);
 
         container.appendChild(contentBox);
     },
 
-    // 格式化 TXT 報價單
     generateQuoteText() {
         this._ensureArray();
         let text = '【Minecraft 附魔報價單】\n\n';
@@ -305,28 +260,23 @@ const Cart = {
             let displayName = item.name;
             const baseEnchant = item.enchants.find(e => e.id >= 200);
             let basePrice = 0;
-            
             if (baseEnchant) {
                 displayName = baseEnchant.fullName.replace('【裝備】', '');
                 basePrice = baseEnchant.price;
             }
             
             text += `=== ${displayName} (#${index + 1}) ===\n`;
-            if (basePrice > 0) {
-                text += `- 基底費用: ${typeof Calculator !== 'undefined' ? Calculator.formatPrice(basePrice) : basePrice}\n`;
-            }
+            text += `基底費用: ${typeof Calculator !== 'undefined' ? Calculator.formatPrice(basePrice) : basePrice}\n`;
             
-            const displayEnchants = item.enchants.filter(e => e.id < 200);
-            displayEnchants.forEach(e => {
+            let enchantsTotal = 0;
+            item.enchants.filter(e => e.id < 200).forEach(e => {
                 text += `- ${e.fullName}: ${typeof Calculator !== 'undefined' ? Calculator.formatPrice(e.price) : e.price}\n`;
+                enchantsTotal += e.price;
             });
             
-            let itemTotal = basePrice;
-            displayEnchants.forEach(e => itemTotal += e.price);
-            
-            text += `\n單件金額: ${typeof Calculator !== 'undefined' ? Calculator.formatPrice(itemTotal) : itemTotal}\n`;
+            text += `單件總額: ${typeof Calculator !== 'undefined' ? Calculator.formatPrice(basePrice + enchantsTotal) : basePrice + enchantsTotal}\n`;
             text += `採購數量: x ${qtyStr}\n`;
-            text += `小計: ${typeof Calculator !== 'undefined' ? Calculator.formatPrice(itemTotal * qtyStr) : (itemTotal * qtyStr)}\n\n`;
+            text += `小計: ${typeof Calculator !== 'undefined' ? Calculator.formatPrice((basePrice + enchantsTotal) * qtyStr) : (basePrice + enchantsTotal) * qtyStr}\n\n`;
         });
         text += `====================\n`;
         text += `總計金額: ${typeof Calculator !== 'undefined' ? Calculator.formatPrice(this.getTotal()) : this.getTotal()}`;
