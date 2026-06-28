@@ -2,79 +2,119 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minecraft 附魔報價系統</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div class="app-container">
         <div class="panel-left">
-            <h2 class="panel-title">選擇裝備</h2>
-            <div class="eq-grid">
-                <button class="eq-btn" data-slot="helmet" onclick="selectEquipment('helmet')">頭盔</button>
-                <button class="eq-btn" data-slot="chestplate" onclick="selectEquipment('chestplate')">胸甲</button>
-                <button class="eq-btn" data-slot="leggings" onclick="selectEquipment('leggings')">護腿</button>
-                <button class="eq-btn" data-slot="boots" onclick="selectEquipment('boots')">靴子</button>
-                <button class="eq-btn" data-slot="sword" onclick="selectEquipment('sword')">劍</button>
-                <button class="eq-btn" data-slot="pickaxe" onclick="selectEquipment('pickaxe')">鎬</button>
-                <button class="eq-btn" data-slot="axe" onclick="selectEquipment('axe')">斧</button>
-                <button class="eq-btn" data-slot="shovel" onclick="selectEquipment('shovel')">鏟</button>
-                <button class="eq-btn" data-slot="hoe" onclick="selectEquipment('hoe')">鋤</button>
-                <button class="eq-btn" data-slot="mace" onclick="selectEquipment('mace')">重錘</button>
-                <button class="eq-btn" data-slot="spear" onclick="selectEquipment('spear')">長矛</button>
-                <button class="eq-btn" data-slot="trident" onclick="selectEquipment('trident')">三叉戟</button>
-                <button class="eq-btn" data-slot="bow" onclick="selectEquipment('bow')">弓</button>
-                <button class="eq-btn" data-slot="crossbow" onclick="selectEquipment('crossbow')">弩</button>
-                <button class="eq-btn" data-slot="fishing" onclick="selectEquipment('fishing')">釣竿</button>
-                <button class="eq-btn" data-slot="elytra" onclick="selectEquipment('elytra')">鞘翅</button>
-            </div>
+            <button class="eq-btn" data-slot="helmet" onclick="Cart.addEquipment('helmet')">頭盔</button>
+            <button class="eq-btn" data-slot="chestplate" onclick="Cart.addEquipment('chestplate')">胸甲</button>
+            <button class="eq-btn" data-slot="leggings" onclick="Cart.addEquipment('leggings')">護腿</button>
+            <button class="eq-btn" data-slot="boots" onclick="Cart.addEquipment('boots')">靴子</button>
+            <button class="eq-btn" data-slot="sword" onclick="Cart.addEquipment('sword')">劍</button>
+            <button class="eq-btn" data-slot="pickaxe" onclick="Cart.addEquipment('pickaxe')">鎬</button>
+            <button class="eq-btn" data-slot="axe" onclick="Cart.addEquipment('axe')">斧</button>
+            <button class="eq-btn" data-slot="shovel" onclick="Cart.addEquipment('shovel')">鏟</button>
+            <button class="eq-btn" data-slot="hoe" onclick="Cart.addEquipment('hoe')">鋤</button>
+            <button class="eq-btn" data-slot="mace" onclick="Cart.addEquipment('mace')">重錘</button>
+            <button class="eq-btn" data-slot="spear" onclick="Cart.addEquipment('spear')">長矛</button>
+            <button class="eq-btn" data-slot="trident" onclick="Cart.addEquipment('trident')">三叉戟</button>
+            <button class="eq-btn" data-slot="bow" onclick="Cart.addEquipment('bow')">弓</button>
+            <button class="eq-btn" data-slot="crossbow" onclick="Cart.addEquipment('crossbow')">弩</button>
+            <button class="eq-btn" data-slot="fishing" onclick="Cart.addEquipment('fishing')">釣竿</button>
+            <button class="eq-btn" data-slot="elytra" onclick="Cart.addEquipment('elytra')">鞘翅</button>
         </div>
-
-        <div class="panel-center">
-            <div id="state-0" class="state-panel active">
-                <div class="placeholder-text">請從左側選擇要附魔的裝備</div>
-            </div>
-
-            <div id="state-1" class="state-panel">
-                <h2 class="panel-title">選擇材質</h2>
-                <div class="material-selection">
-                    <button class="material-btn" onclick="selectMaterial('鑽石')">💎 鑽石</button>
-                    <button class="material-btn" onclick="selectMaterial('獄髓')">🔥 獄髓</button>
-                </div>
-            </div>
-
-            <div id="state-2" class="state-panel">
-                <div class="enchant-header">
-                    <h2 class="panel-title" id="current-equip-title" style="border:none; padding:0;">挑選附魔</h2>
-                    <input type="text" id="search-box" placeholder="搜尋附魔..." onkeyup="filterEnchants()">
-                </div>
-                <div id="enchant-list" class="enchant-list"></div>
-            </div>
-        </div>
-
-        <div class="panel-right">
-            <h2 class="panel-title">報價單</h2>
-            <div id="selected-list" class="cart-list"></div>
-            
-            <div class="cart-footer">
-                <div class="total-row">
-                    <span>總金額:</span>
-                    <span id="total-price-value" class="total-price">0</span>
-                </div>
-                <div class="export-actions">
-                    <button class="export-btn" onclick="if(typeof exportTXT === 'function') exportTXT();">📄 匯出 TXT</button>
-                    <button class="export-btn" onclick="if(typeof exportJSON === 'function') exportJSON();">📦 匯出 JSON</button>
-                </div>
-            </div>
-        </div>
+        <div id="selected-list"></div>
+        <div id="total-price-value">0</div>
     </div>
-
-    <script src="js/data.js"></script>
-    <script src="js/calculator.js"></script>
-    <script src="js/storage.js"></script>
     <script src="js/cart.js"></script>
-    <script src="js/app.js"></script>
-    <script src="js/export.js"></script>
-    <script src="js/search.js"></script>
+    <script src="js/calculator.js"></script>
 </body>
 </html>
+```(￣∇￣)
+
+### 修改檔案：`js/cart.js`
+```javascript
+const Cart = {
+    items: [],
+    activeItemId: null,
+
+    get slotNames() {
+        return {
+            helmet: '頭盔', chestplate: '胸甲', leggings: '護腿', boots: '靴子',
+            elytra: '鞘翅', sword: '劍', axe: '斧', mace: '重錘', spear: '長矛', pickaxe: '鎬', shovel: '鏟',
+            hoe: '鋤', bow: '弓', crossbow: '弩', trident: '三叉戟', fishing: '釣竿'
+        };
+    },
+
+    addEquipment(slot) {
+        if (!Array.isArray(this.items)) this.items = [];
+        const newItem = {
+            id: 'eq_' + Date.now(),
+            slot: slot,
+            name: this.slotNames[slot] || slot,
+            quantity: 1,
+            enchants: []
+        };
+        this.items.push(newItem);
+        this.activeItemId = newItem.id;
+        this.render();
+    },
+
+    removeEquipment(id) {
+        this.items = this.items.filter(i => i.id !== id);
+        this.activeItemId = this.items.length > 0 ? this.items[0].id : null;
+        this.render();
+    },
+
+    updateQuantity(id, change) {
+        const item = this.items.find(i => i.id === id);
+        if (item) {
+            item.quantity = Math.max(1, Math.min(3, (item.quantity || 1) + change));
+            this.render();
+        }
+    },
+
+    setActiveItem(id) {
+        this.activeItemId = id;
+        this.render();
+    },
+
+    getTotal() {
+        let total = 0;
+        this.items.forEach(item => {
+            let itemSum = item.enchants.reduce((s, e) => s + e.price, 0);
+            total += itemSum * (item.quantity || 1);
+        });
+        return total;
+    },
+
+    render() {
+        const container = document.getElementById('selected-list');
+        container.innerHTML = '';
+        if (document.getElementById('total-price-value')) document.getElementById('total-price-value').innerText = this.getTotal();
+
+        this.items.forEach((item, index) => {
+            const box = document.createElement('div');
+            box.style.cssText = 'background:#18181d; padding:15px; margin:10px; border:1px solid #444;';
+            box.innerHTML = `
+                <div>${item.name} (x${item.quantity}) 
+                    <button onclick="Cart.updateQuantity('${item.id}', -1)">❮</button>
+                    <button onclick="Cart.updateQuantity('${item.id}', 1)">❯</button>
+                    <button onclick="Cart.removeEquipment('${item.id}')">🗑️</button>
+                </div>`;
+            item.enchants.forEach(e => {
+                box.innerHTML += `<div>${e.fullName}: ${e.price > 0 ? e.price : '自備'}</div>`;
+            });
+            container.appendChild(box);
+        });
+    }
+};
+```(￣∇￣)
+
+### 修改檔案：`js/calculator.js`
+```javascript
+const Calculator = {
+    formatPrice: (price) => price.toLocaleString()
+};
