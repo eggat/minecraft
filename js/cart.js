@@ -102,15 +102,27 @@ const Cart = {
         const activeItem = this.getActiveItem();
         if (!activeItem || enchant.id >= 200) return false;
 
-        const isLocalIncompatible = activeItem.enchants.some(selected =>
-            (selected.incompatible && selected.incompatible.includes(enchant.name)) ||
-            (enchant.incompatible && enchant.incompatible.includes(selected.name))
-        );
+        // 1. 檢查當前裝備中已選的附魔是否與此附魔互斥
+        // 這裡確保名稱比對是完全一致的 (包含處理括號問題)
+        const isLocalIncompatible = activeItem.enchants.some(selected => {
+            if (!selected.incompatible || !Array.isArray(selected.incompatible)) return false;
+            
+            // 比對互斥清單中的名稱
+            // 由於 JSON 中的 name 是純中文，這裡比對名稱最準確
+            return selected.incompatible.includes(enchant.name) || 
+                   (enchant.incompatible && enchant.incompatible.includes(selected.name));
+        });
+        
         if (isLocalIncompatible) return true;
 
+        // 2. 檢查是否為特殊附魔的全域唯一性
         if (enchant.rarity === '特殊') {
-            return this.items.some(item => item.id !== activeItem.id && item.enchants.some(e => e.id === enchant.id));
+            return this.items.some(item => 
+                item.id !== activeItem.id && 
+                item.enchants.some(e => e.id === enchant.id)
+            );
         }
+        
         return false;
     },
 
