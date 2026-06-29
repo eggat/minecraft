@@ -373,14 +373,14 @@ h2 {
     border-color: #52525b !important;
 }
 
-/* 垃圾桶按鈕特殊處理 */
-#selected-list button:last-child {
+/* 垃圾桶按鈕特殊處理（使用精準路徑，避開導航列的右箭頭） */
+#selected-list > div > div > button:last-child {
     background: rgba(239, 68, 68, 0.1) !important;
     border-color: rgba(239, 68, 68, 0.3) !important;
     color: #ef4444 !important;
 }
 
-#selected-list button:last-child:hover {
+#selected-list > div > div > button:last-child:hover {
     background: #ef4444 !important;
     color: #fff !important;
 }
