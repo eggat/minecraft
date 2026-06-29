@@ -385,3 +385,39 @@ h2 {
     .action-buttons { flex-direction: column; }
     .action-buttons .btn { width: 100%; margin-bottom: 5px; }
 }
+/* 讓購物車內的數量按鈕與刪除鈕變美 */
+#selected-list button {
+    background: #27272a !important; /* 與深色介面統一 */
+    border: 1px solid #3f3f46 !important;
+    color: #a1a1aa !important;
+    padding: 2px 8px !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    font-size: 0.9rem !important;
+    transition: all 0.2s ease !important;
+}
+
+#selected-list button:hover {
+    background: #3f3f46 !important;
+    color: #fff !important;
+    border-color: #52525b !important;
+}
+
+/* 垃圾桶按鈕特殊處理 */
+#selected-list button:last-child {
+    background: rgba(239, 68, 68, 0.1) !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
+    color: #ef4444 !important;
+}
+
+#selected-list button:last-child:hover {
+    background: #ef4444 !important;
+    color: #fff !important;
+}
+
+/* 讓中間的數字看起來更乾淨 */
+#selected-list span[style*="padding:0 10px"] {
+    color: #fff !important;
+    font-weight: bold !important;
+    font-size: 1rem !important;
+}
