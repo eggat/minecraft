@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minecraft 附魔報價系統</title>
-    <link rel="stylesheet" href="css/style.css?v=3">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
@@ -33,7 +33,7 @@
                     <button class="eq-btn" data-slot="trident">三叉戟</button>
                     <button class="eq-btn" data-slot="fishing">釣竿</button>
                     <button class="eq-btn" data-slot="mace">重錘</button>
-                    <button class="eq-btn" data-slot="spear">長矛</button>
+<button class="eq-btn" data-slot="spear">長矛</button>
                 </div>
             </section>
 
@@ -61,17 +61,6 @@
                         style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
                         <h3 id="enchant-target-title" style="color: var(--tab-active); margin: 0; font-size: 1.2rem;">✨
                             正在配置：</h3>
-                    </div>
-
-                    <div id="trim-preview-container" style="display: none; justify-content: space-between; align-items: center; background: #1f1f22; padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #333;">
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <div id="trim-visual-icon" style="width: 36px; height: 36px; background: #27272a; border-radius: 6px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; border: 2px solid #444; transition: all 0.3s ease;">👕</div>
-                            <div style="display: flex; flex-direction: column;">
-                                <span style="color: #fff; font-size: 0.95rem; font-weight: bold;">裝備模板 (Armor Trim)</span>
-                                <span id="trim-text-desc" style="color: #a1a1aa; font-size: 0.85rem;">尚未套用</span>
-                            </div>
-                        </div>
-                        <button id="btn-open-trim" style="background: #3f3f46; color: #fff; border: 1px solid #52525b; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: 0.2s;">設定模板</button>
                     </div>
 
                     <div class="search-bar">
@@ -113,43 +102,6 @@
                 </div>
             </section>
         </main>
-
-        <div id="trim-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(5px);">
-            <div style="background: var(--panel-bg); width: 90%; max-width: 600px; border-radius: 16px; border: 1px solid var(--border-color); padding: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); display: flex; flex-direction: column; gap: 20px;">
-                
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px;">
-                    <h3 style="color: #fff; margin: 0; font-size: 1.3rem;">🎨 配置裝備模板 (Armor Trim)</h3>
-                    <button onclick="document.getElementById('trim-modal').style.display='none'" style="background: transparent; border: none; color: #aaa; font-size: 1.8rem; cursor: pointer; line-height: 1; transition: 0.2s;">&times;</button>
-                </div>
-                
-                <div>
-                    <h4 style="color: #e4e4e7; margin-bottom: 12px; font-size: 1rem;">1. 選擇圖案 (Pattern)</h4>
-                    <div id="trim-pattern-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; max-height: 160px; overflow-y: auto; padding-right: 5px;">
-                        </div>
-                </div>
-
-                <div>
-                    <h4 style="color: #e4e4e7; margin-bottom: 12px; font-size: 1rem;">2. 選擇材質 (Material)</h4>
-                    <div id="trim-material-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px;">
-                        </div>
-                </div>
-
-                <div style="display: flex; justify-content: space-between; align-items: center; background: #18181b; padding: 15px; border-radius: 12px; border: 1px solid #333; margin-top: 5px;">
-                    <div style="display: flex; align-items: center; gap: 15px;">
-                        <div id="modal-trim-preview-icon" style="width: 50px; height: 50px; background: #27272a; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 1.8rem; border: 2px solid #444; transition: all 0.3s ease;">👕</div>
-                        <div>
-                            <div style="color: #fff; font-weight: bold; font-size: 1.1rem;" id="modal-trim-preview-name">尚未選擇</div>
-                            <div style="color: #a1a1aa; font-size: 0.9rem;">即時顏色預覽</div>
-                        </div>
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <button id="btn-remove-trim" class="btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); display: none; padding: 8px 15px;">移除</button>
-                        <button id="btn-apply-trim" class="btn" style="background: var(--primary-color, #6366f1); color: #fff; border: none; padding: 8px 20px;">套用</button>
-                    </div>
-                </div>
-
-            </div>
-        </div>
 
         <div id="toast-container" class="toast-container"></div>
     </div>
