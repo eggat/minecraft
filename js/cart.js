@@ -24,8 +24,7 @@ const Cart = {
             slot: slot,
             name: this.slotNames[slot] || slot,
             quantity: 1,
-            enchants: [],
-            trim: null // 初始化模板屬性
+            enchants: []
         };
         this.items.push(newItem);
         this.activeItemId = newItem.id;
@@ -103,15 +102,27 @@ const Cart = {
         const activeItem = this.getActiveItem();
         if (!activeItem || enchant.id >= 200) return false;
 
-        const isLocalIncompatible = activeItem.enchants.some(selected =>
-            (selected.incompatible && selected.incompatible.includes(enchant.name)) ||
-            (enchant.incompatible && enchant.incompatible.includes(selected.name))
-        );
+        // 1. 檢查當前裝備中已選的附魔是否與此附魔互斥
+        // 這裡確保名稱比對是完全一致的 (包含處理括號問題)
+        const isLocalIncompatible = activeItem.enchants.some(selected => {
+            if (!selected.incompatible || !Array.isArray(selected.incompatible)) return false;
+            
+            // 比對互斥清單中的名稱
+            // 由於 JSON 中的 name 是純中文，這裡比對名稱最準確
+            return selected.incompatible.includes(enchant.name) || 
+                   (enchant.incompatible && enchant.incompatible.includes(selected.name));
+        });
+        
         if (isLocalIncompatible) return true;
 
+        // 2. 檢查是否為特殊附魔的全域唯一性
         if (enchant.rarity === '特殊') {
-            return this.items.some(item => item.id !== activeItem.id && item.enchants.some(e => e.id === enchant.id));
+            return this.items.some(item => 
+                item.id !== activeItem.id && 
+                item.enchants.some(e => e.id === enchant.id)
+            );
         }
+        
         return false;
     },
 
@@ -139,50 +150,54 @@ const Cart = {
         container.innerHTML = '';
 
         const totalEl = document.getElementById('total-price-value');
-        if (totalEl) {
-            totalEl.innerText = typeof Calculator !== 'undefined' && Calculator.formatPrice ? Calculator.formatPrice(this.getTotal()) : this.getTotal();
-        }
+        if (totalEl) totalEl.innerText = typeof Calculator !== 'undefined' && Calculator.formatPrice ? Calculator.formatPrice(this.getTotal()) : this.getTotal();
 
         if (this.items.length === 0) {
             container.innerHTML = `<div style="text-align: center; color: #888; padding: 20px;">報價單目前為空</div>`;
             return;
         }
 
+        // --- 核心：恢復左右切換導航邏輯 ---
         let currentIndex = this.items.findIndex(item => item.id === this.activeItemId);
         if (currentIndex === -1) { currentIndex = this.items.length - 1; this.activeItemId = this.items[currentIndex].id; }
+
+        const nav = document.createElement('div');
+        nav.style.cssText = 'display: flex; justify-content: space-between; align-items: center; background: #22222b; padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333;';
+        
+        const btnPrev = document.createElement('button');
+        btnPrev.innerText = '◀';
+        btnPrev.style.cssText = `background: ${currentIndex > 0 ? '#444' : 'transparent'}; border: none; color: #fff; padding: 5px 10px; border-radius: 4px; cursor: ${currentIndex > 0 ? 'pointer' : 'default'};`;
+        btnPrev.onclick = () => { if(currentIndex > 0) this.setActiveItem(this.items[currentIndex-1].id); };
+
+        const titleSpan = document.createElement('span');
+        titleSpan.style.cssText = 'color: #fff; font-weight: bold; font-size: 1rem;';
+        titleSpan.innerText = `${this.items[currentIndex].name} (${currentIndex + 1}/${this.items.length})`;
+
+        const btnNext = document.createElement('button');
+        btnNext.innerText = '▶';
+        btnNext.style.cssText = `background: ${currentIndex < this.items.length - 1 ? '#444' : 'transparent'}; border: none; color: #fff; padding: 5px 10px; border-radius: 4px; cursor: ${currentIndex < this.items.length - 1 ? 'pointer' : 'default'};`;
+        btnNext.onclick = () => { if(currentIndex < this.items.length - 1) this.setActiveItem(this.items[currentIndex+1].id); };
+
+        nav.appendChild(btnPrev); nav.appendChild(titleSpan); nav.appendChild(btnNext);
+        container.appendChild(nav);
+        // --- 核心結束 ---
 
         const item = this.items[currentIndex];
         const qty = item.quantity || 1;
 
-        // 導航欄
-        const nav = document.createElement('div');
-        nav.style.cssText = 'display: flex; justify-content: space-between; align-items: center; background: #22222b; padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333;';
-        nav.innerHTML = `
-            <button onclick="Cart.setActiveItem('${currentIndex > 0 ? this.items[currentIndex-1].id : item.id}')" style="background:${currentIndex > 0 ? '#444' : 'transparent'}; border:none; color:#fff; padding:5px 10px; border-radius:4px; cursor:pointer;">◀</button>
-            <span style="color:#fff; font-weight:bold; font-size:1rem;">${item.name} (${currentIndex + 1}/${this.items.length})</span>
-            <button onclick="Cart.setActiveItem('${currentIndex < this.items.length - 1 ? this.items[currentIndex+1].id : item.id}')" style="background:${currentIndex < this.items.length - 1 ? '#444' : 'transparent'}; border:none; color:#fff; padding:5px 10px; border-radius:4px; cursor:pointer;">▶</button>
-        `;
-        container.appendChild(nav);
-
-        // 卡片
         const box = document.createElement('div');
-        box.style.cssText = 'background:#18181d; padding:15px; border-radius:8px; border:1px solid #333;';
+        box.style.cssText = 'background: #18181b; padding: 15px; border-radius: 8px; border: 1px solid #3f3f46;';
         box.innerHTML = `
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                <span style="color:#aaa;">數量:</span>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span style="color: #aaa;">數量:</span>
                 <div>
                     <button onclick="Cart.updateQuantity('${item.id}', -1)">❮</button>
-                    <span style="padding:0 10px;">${qty}</span>
+                    <span style="padding: 0 10px;">${qty}</span>
                     <button onclick="Cart.updateQuantity('${item.id}', 1)">❯</button>
                     <button onclick="Cart.removeEquipment('${item.id}')" style="margin-left:10px;">🗑️</button>
                 </div>
             </div>`;
         
-        // --- 新增：顯示模板資訊 ---
-        if (item.trim) {
-            box.innerHTML += `<div style="color:var(--tab-active); font-size:0.9rem; margin-bottom:5px;">🎨 模板: ${item.trim.pattern} / ${item.trim.material.name}</div>`;
-        }
-
         item.enchants.forEach(e => {
             box.innerHTML += `<div style="display:flex; justify-content:space-between; font-size:0.95rem;">
                 <span style="color:${e.id >= 200 ? '#aaa' : '#fff'}">${e.fullName}</span>
@@ -198,7 +213,6 @@ const Cart = {
         this.items.forEach((item, index) => {
             const qty = item.quantity || 1;
             text += `=== ${item.name} (x${qty}) ===\n`;
-            if (item.trim) text += `🎨 模板: ${item.trim.pattern} / ${item.trim.material.name}\n`;
             let itemTotal = 0;
             item.enchants.forEach(e => {
                 const priceText = (e.price === 0) ? '自備' : e.price;
