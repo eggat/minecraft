@@ -355,36 +355,6 @@ h2 {
 ::-webkit-scrollbar-track { background: #09090b; border-radius: 4px; }
 ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #52525b; }
-
-/* ==================================================
-   響應式手機版 (Media Queries)
-   ================================================== */
-@media (max-width: 1024px) {
-    .layout-grid {
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-    .equipment-list {
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    .eq-btn {
-        flex: 1 1 calc(16.666% - 12px);
-        padding: 10px;
-    }
-    .enchant-panel, .cart-panel { min-height: auto; }
-}
-
-@media (max-width: 600px) {
-    body { padding: 10px; }
-    .header h1 { font-size: 1.5rem; }
-    .eq-btn { flex: 1 1 calc(33.333% - 10px); font-size: 0.95rem; }
-    .category-tabs { flex-wrap: wrap; }
-    .tab-btn { flex: 1 1 calc(50% - 10px); }
-    .action-buttons { flex-direction: column; }
-    .action-buttons .btn { width: 100%; margin-bottom: 5px; }
-}
 /* 讓購物車內的數量按鈕與刪除鈕變美 */
 #selected-list button {
     background: #27272a !important; /* 與深色介面統一 */
@@ -420,4 +390,33 @@ h2 {
     color: #fff !important;
     font-weight: bold !important;
     font-size: 1rem !important;
+}
+/* ==================================================
+   響應式手機版 (Media Queries)
+   ================================================== */
+@media (max-width: 1024px) {
+    .layout-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    .equipment-list {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .eq-btn {
+        flex: 1 1 calc(16.666% - 12px);
+        padding: 10px;
+    }
+    .enchant-panel, .cart-panel { min-height: auto; }
+}
+
+@media (max-width: 600px) {
+    body { padding: 10px; }
+    .header h1 { font-size: 1.5rem; }
+    .eq-btn { flex: 1 1 calc(33.333% - 10px); font-size: 0.95rem; }
+    .category-tabs { flex-wrap: wrap; }
+    .tab-btn { flex: 1 1 calc(50% - 10px); }
+    .action-buttons { flex-direction: column; }
+    .action-buttons .btn { width: 100%; margin-bottom: 5px; }
 }
