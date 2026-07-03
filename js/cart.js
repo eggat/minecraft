@@ -24,7 +24,8 @@ const Cart = {
             slot: slot,
             name: this.slotNames[slot] || slot,
             quantity: 1,
-            enchants: []
+            enchants: [],
+            trim: null
         };
         this.items.push(newItem);
         this.activeItemId = newItem.id;
@@ -33,7 +34,6 @@ const Cart = {
         return newItem;
     },
 
-    // 新增：處理名稱變更
     updateName(id, newName) {
         const item = this.items.find(i => i.id === id);
         if (item) {
@@ -60,7 +60,7 @@ const Cart = {
         let newQty = (item.quantity || 1) + change;
         if (newQty < 1) newQty = 1;
         if (newQty > 3) {
-            if (typeof showToast === 'function') showToast('單一裝備數量上限為 3 件！');
+            console.log('單一裝備數量上限為 3 件！');
             newQty = 3;
         }
         item.quantity = newQty;
@@ -88,7 +88,7 @@ const Cart = {
         if (enchant.id >= 200) {
             activeItem.enchants = activeItem.enchants.filter(e => e.id < 200);
             activeItem.enchants.push(enchant);
-            // 名稱保留使用者自定義，除非是第一次建立
+            activeItem.name = enchant.fullName || enchant.name;
         } else {
             if (!Array.isArray(enchant.slots) || !enchant.slots.includes(activeItem.slot)) return;
             const index = activeItem.enchants.findIndex(e => e.id === enchant.id);
@@ -133,6 +133,7 @@ const Cart = {
         this.items = [];
         this.activeItemId = null;
         this.render();
+        console.log('已清空所有選擇');
         if (typeof StorageManager !== 'undefined' && StorageManager.saveCart) StorageManager.saveCart(this.items);
     },
 
@@ -153,7 +154,9 @@ const Cart = {
         container.innerHTML = '';
 
         const totalEl = document.getElementById('total-price-value');
-        if (totalEl) totalEl.innerText = typeof Calculator !== 'undefined' && Calculator.formatPrice ? Calculator.formatPrice(this.getTotal()) : this.getTotal();
+        if (totalEl) {
+            totalEl.innerText = typeof Calculator !== 'undefined' && Calculator.formatPrice ? Calculator.formatPrice(this.getTotal()) : this.getTotal();
+        }
 
         if (this.items.length === 0) {
             container.innerHTML = `<div style="text-align: center; color: #888; padding: 20px;">報價單目前為空</div>`;
@@ -178,11 +181,10 @@ const Cart = {
         const box = document.createElement('div');
         box.style.cssText = 'background: #18181b; padding: 15px; border-radius: 8px; border: 1px solid #3f3f46;';
         
-        // --- 名稱編輯區域 ---
         const nameInput = document.createElement('input');
         nameInput.type = 'text';
         nameInput.value = item.name;
-        nameInput.placeholder = '自定義名稱...';
+        nameInput.placeholder = '自定義裝備名稱...';
         nameInput.style.cssText = 'width: 100%; background: #25252d; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 6px; margin-bottom: 10px; box-sizing: border-box;';
         nameInput.onchange = (e) => this.updateName(item.id, e.target.value);
         box.appendChild(nameInput);
@@ -192,12 +194,16 @@ const Cart = {
                 <span style="color: #aaa;">數量:</span>
                 <div>
                     <button onclick="Cart.updateQuantity('${item.id}', -1)">❮</button>
-                    <span style="padding: 0 10px;">${qty}</span>
+                    <span style="padding: 0 10px; color:#fff;">${qty}</span>
                     <button onclick="Cart.updateQuantity('${item.id}', 1)">❯</button>
                     <button onclick="Cart.removeEquipment('${item.id}')" style="margin-left:10px;">🗑️</button>
                 </div>
             </div>`;
         
+        if (item.trim) {
+            box.innerHTML += `<div style="color:var(--tab-active); font-size:0.9rem; margin-bottom:5px;">🎨 模板: ${item.trim.pattern} / ${item.trim.material.name}</div>`;
+        }
+
         item.enchants.forEach(e => {
             box.innerHTML += `<div style="display:flex; justify-content:space-between; font-size:0.95rem;">
                 <span style="color:${e.id >= 200 ? '#aaa' : '#fff'}">${e.fullName}</span>
@@ -209,17 +215,18 @@ const Cart = {
 
     generateQuoteText() {
         this._ensureArray();
+        if (this.items.length === 0) {
+            console.log('⚠️ 報價單是空的，無法匯出');
+            return '';
+        }
         let text = '【Minecraft 附魔報價單】\n\n';
-        this.items.forEach((item, index) => {
-            const qty = item.quantity || 1;
-            text += `=== ${item.name} (x${qty}) ===\n`;
-            let itemTotal = 0;
+        this.items.forEach((item) => {
+            text += `=== ${item.name} (x${item.quantity || 1}) ===\n`;
+            if (item.trim) text += `🎨 模板: ${item.trim.pattern} / ${item.trim.material.name}\n`;
             item.enchants.forEach(e => {
-                const priceText = (e.price === 0) ? '自備' : e.price;
-                text += `${e.fullName}: ${priceText}\n`;
-                itemTotal += e.price;
+                text += `${e.fullName}: ${e.price === 0 ? '自備' : '$' + e.price}\n`;
             });
-            text += `小計: ${itemTotal * qty}\n\n`;
+            text += '\n';
         });
         text += `總金額: ${this.getTotal()}`;
         return text;
