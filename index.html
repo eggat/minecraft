@@ -39,69 +39,71 @@
 
             <section class="panel enchant-panel" id="main-action-panel">
                 <h2>配置面板</h2>
-                <div id="state-empty" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80%; color: #888;">
+
+                <div id="state-empty"
+                    style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80%; color: #888;">
                     <div style="font-size: 4rem; margin-bottom: 20px; opacity: 0.5;">👈</div>
                     <h3>請先從左側選擇一個裝備項目</h3>
+                    <p style="margin-top: 10px; font-size: 0.9rem;">盔甲將進入材質選擇分支，工具與武器將直接展開附魔</p>
                 </div>
 
-                <div id="state-material" style="display: none; flex-direction: column; align-items: center; justify-content: center; height: 80%;">
-                    <h3 id="material-title" style="color: var(--tab-active); margin-bottom: 10px; font-size: 1.5rem;">選擇材質</h3>
-                    <div id="material-btn-group" style="display: flex; gap: 20px;"></div>
+                <div id="state-material"
+                    style="display: none; flex-direction: column; align-items: center; justify-content: center; height: 80%;">
+                    <h3 id="material-title" style="color: var(--tab-active); margin-bottom: 10px; font-size: 1.5rem;">
+                        選擇材質</h3>
+                    <p style="color: #aaa; margin-bottom: 30px;">請選擇您要建立的裝備材質</p>
+                    <div id="material-btn-group" style="display: flex; gap: 20px;">
+                    </div>
                 </div>
 
                 <div id="state-enchant" style="display: none;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-                        <h3 id="enchant-target-title" style="color: var(--tab-active); margin: 0; font-size: 1.2rem;">✨ 正在配置：</h3>
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+                        <h3 id="enchant-target-title" style="color: var(--tab-active); margin: 0; font-size: 1.2rem;">✨
+                            正在配置：</h3>
                     </div>
-                    <div id="trim-preview-container" style="display: none; justify-content: space-between; align-items: center; background: #1f1f22; padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #333;">
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <div id="trim-visual-icon" style="width: 36px; height: 36px; background: #27272a; border-radius: 6px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; border: 2px solid #444;">👕</div>
-                            <div>
-                                <span style="color: #fff; font-weight: bold; font-size: 0.95rem;">裝備模板</span>
-                                <div id="trim-text-desc" style="color: #a1a1aa; font-size: 0.85rem;">尚未套用</div>
-                            </div>
-                        </div>
-                        <button id="btn-open-trim" style="background: #3f3f46; color: #fff; border: 1px solid #52525b; padding: 6px 12px; border-radius: 6px; cursor: pointer;">設定模板</button>
-                    </div>
+
                     <div class="search-bar">
                         <input type="text" id="search-input" placeholder="搜尋附魔...">
                     </div>
+
                     <div class="category-tabs" id="category-tabs">
                         <button class="tab-btn active" data-category="普通">普通附魔</button>
                         <button class="tab-btn" data-category="特殊">特殊附魔</button>
                         <button class="tab-btn" data-category="收藏">⭐ 收藏</button>
                         <button class="tab-btn" data-category="最近">🕒 最近</button>
                     </div>
-                    <div class="enchant-list" id="enchant-list"></div>
+
+                    <div class="enchant-list" id="enchant-list">
+                    </div>
                 </div>
             </section>
 
             <section class="panel cart-panel">
                 <h2>已選報價單</h2>
-                <div class="selected-list" id="selected-list" style="border: none; background: transparent; padding: 0;"></div>
+                <div class="selected-list" id="selected-list"
+                    style="border: none; background: transparent; padding: 0;">
+                </div>
+
                 <div class="summary-box">
-                    <div class="total-price">總價：<span id="total-price-value">0</span></div>
+                    <div class="total-price">
+                        總價：<span id="total-price-value">0</span>
+                    </div>
                     <div class="action-buttons">
                         <button id="btn-clear" class="btn btn-danger">清空</button>
                         <button id="btn-copy" class="btn btn-primary">複製報價</button>
                     </div>
                     <div class="action-buttons" style="margin-top: 10px;">
-                        <button id="btn-export-txt" class="btn" style="background-color: #3a3a45; color: #ccc;">匯出 TXT</button>
-                        <button id="btn-export-json" class="btn" style="background-color: #3a3a45; color: #ccc;">匯出 JSON</button>
+                        <button id="btn-export-txt" class="btn" style="background-color: #3a3a45; color: #ccc;">匯出
+                            TXT</button>
+                        <button id="btn-export-json" class="btn" style="background-color: #3a3a45; color: #ccc;">匯出
+                            JSON</button>
                     </div>
                 </div>
             </section>
         </main>
+
         <div id="toast-container" class="toast-container"></div>
-    </div>
-    
-    <div id="trim-modal" style="display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000; justify-content:center; align-items:center;">
-        <div style="background:#18181b; width:90%; max-width:500px; padding:20px; border-radius:10px; border:1px solid #333;">
-            <h3 style="color:#fff; margin-bottom:15px;">設定裝備模板</h3>
-            <div id="trim-pattern-list"></div>
-            <div id="trim-material-list" style="margin-top:10px;"></div>
-            <button id="btn-apply-trim" class="btn btn-primary" style="margin-top:15px;">套用</button>
-        </div>
     </div>
 
     <script src="js/data.js"></script>
@@ -113,4 +115,5 @@
     <script src="js/api.js"></script>
     <script src="js/app.js"></script>
 </body>
+
 </html>
