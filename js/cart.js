@@ -154,9 +154,7 @@ const Cart = {
         container.innerHTML = '';
 
         const totalEl = document.getElementById('total-price-value');
-        if (totalEl) {
-            totalEl.innerText = typeof Calculator !== 'undefined' && Calculator.formatPrice ? Calculator.formatPrice(this.getTotal()) : this.getTotal();
-        }
+        if (totalEl) totalEl.innerText = typeof Calculator !== 'undefined' && Calculator.formatPrice ? Calculator.formatPrice(this.getTotal()) : this.getTotal();
 
         if (this.items.length === 0) {
             container.innerHTML = `<div style="text-align: center; color: #888; padding: 20px;">報價單目前為空</div>`;
@@ -169,6 +167,7 @@ const Cart = {
         const item = this.items[currentIndex];
         const qty = item.quantity || 1;
 
+        // 導航欄
         const nav = document.createElement('div');
         nav.style.cssText = 'display: flex; justify-content: space-between; align-items: center; background: #22222b; padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333;';
         nav.innerHTML = `
@@ -178,9 +177,11 @@ const Cart = {
         `;
         container.appendChild(nav);
 
+        // 裝備卡片內容
         const box = document.createElement('div');
         box.style.cssText = 'background: #18181b; padding: 15px; border-radius: 8px; border: 1px solid #3f3f46;';
         
+        // 名稱編輯欄
         const nameInput = document.createElement('input');
         nameInput.type = 'text';
         nameInput.value = item.name;
