@@ -393,7 +393,7 @@ h2 {
 }
 /* 固定在左上角的 Logo */
 .side-logo {
-    position: fixed;   /* 固定定位 */
+    position: absolute;   /* 固定定位 */
     top: 20px;         /* 距離頂部 */
     left: 20px;        /* 距離左邊 */
     width: 200px;      /* 設定你想要的寬度 */
