@@ -396,7 +396,7 @@ h2 {
     position: absolute;   /* 固定定位 */
     top: 20px;         /* 距離頂部 */
     left: 20px;        /* 距離左邊 */
-    width: 300px;      /* 設定你想要的寬度 */
+    width: 250px;      /* 設定你想要的寬度 */
     height: auto;
     z-index: 1000;     /* 確保在最上層 */
     filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
