@@ -392,19 +392,40 @@ h2 {
     font-size: 1rem !important;
 }
 /* 固定在左上角的 Logo */
-.side-logo {
-    position: absolute;   /* 固定定位 */
-    top: 20px;         /* 距離頂部 */
-    left: 20px;        /* 距離左邊 */
-    width: 250px;      /* 設定你想要的寬度 */
-    height: auto;
-    z-index: 1000;     /* 確保在最上層 */
-    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
-}
+/* --- 改良後的 Logo 樣式 --- */
 
+/* 電腦版：固定在左上角 */
+.side-logo {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    width: 200px;
+    height: auto;
+    z-index: 1000;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+    transition: all 0.3s ease; /* 增加過渡效果 */
+}
 /* 移除標頭中原本的 Logo 影響 */
 .header {
     padding-top: 40px; /* 稍微留空間給上面的 Logo (如果 Logo 會擋住標題) */
+}
+/* 手機版：縮小並變成嵌入標題左側 */
+@media (max-width: 900px) {
+    .side-logo {
+        position: static;    /* 取消固定定位 */
+        width: 50px;         /* 大幅縮小 */
+        margin-right: 10px;  /* 與標題拉開距離 */
+        filter: none;        /* 手機版簡化特效 */
+    }
+
+    /* 調整標頭區塊以容納手機版 Logo */
+    .header {
+        display: flex;
+        flex-direction: row; /* 改回水平排列 */
+        align-items: center;
+        justify-content: center;
+        padding: 10px 0;
+    }
 }
 @media (max-width: 1024px) {
     .layout-grid {
