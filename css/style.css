@@ -33,8 +33,13 @@ body {
     padding: 20px;
     line-height: 1.6;
     overflow-x: hidden;
+   background-image: url('https://replicate.delivery/xpbkg/J7w3N5GfTjYlF6b5Q2e3W9e8R7l1D5A6O0E1I3C2N0E8L5oA/galaxy_background_for_website.jpg');
+    background-size: cover;        /* 讓圖片覆蓋整個畫面 */
+    background-position: center;   /* 圖片置中 */
+    background-repeat: no-repeat;  /* 不重複平鋪 */
+    background-attachment: fixed;  /* 背景固定，捲動頁面時更有質感 */
 }
-
+http://googleusercontent.com/immersive_entry_chip/0
 /* ==================================================
    佈局與面板美化
    ================================================== */
