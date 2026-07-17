@@ -153,7 +153,9 @@ const Cart = {
         container.innerHTML = '';
 
         const totalEl = document.getElementById('total-price-value');
-        if (totalEl) totalEl.innerText = typeof Calculator !== 'undefined' && Calculator.formatPrice ? Calculator.formatPrice(this.getTotal()) : this.getTotal();
+        if (totalEl) {
+            totalEl.innerText = typeof Calculator !== 'undefined' && Calculator.formatPrice ? Calculator.formatPrice(this.getTotal()) : this.getTotal();
+        }
 
         if (this.items.length === 0) {
             container.innerHTML = `<div style="text-align: center; color: #888; padding: 20px;">報價單目前為空</div>`;
@@ -166,7 +168,6 @@ const Cart = {
         const item = this.items[currentIndex];
         const qty = item.quantity || 1;
 
-        // 導航欄 (保持原樣)
         const nav = document.createElement('div');
         nav.style.cssText = 'display: flex; justify-content: space-between; align-items: center; background: #22222b; padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333;';
         nav.innerHTML = `
@@ -176,7 +177,6 @@ const Cart = {
         `;
         container.appendChild(nav);
 
-        // 卡片渲染區
         const box = document.createElement('div');
         box.style.cssText = 'background: #18181b; padding: 15px; border-radius: 8px; border: 1px solid #3f3f46;';
         
@@ -203,19 +203,14 @@ const Cart = {
             box.innerHTML += `<div style="color:var(--tab-active); font-size:0.9rem; margin-bottom:5px;">🎨 模板: ${item.trim.pattern} / ${item.trim.material.name}</div>`;
         }
 
-        // --- 核心修正區：處理價格顯示 ---
         item.enchants.forEach(e => {
-            // 邏輯：如果是 ID >= 200 (基底)，且價格為 0，顯示「自備」。如果是附魔書，價格 0 顯示免費或對應金額
-            let displayPrice = '';
-            if (e.id >= 200 && e.price === 0) {
-                displayPrice = '自備';
-            } else {
-                displayPrice = e.price === 0 ? '免費' : '$' + e.price;
-            }
-
-            box.innerHTML += `<div style="display:flex; justify-content:space-between; font-size:0.95rem;">
-                <span style="color:${e.id >= 200 ? '#fff' : '#aaa'}">${e.fullName}</span>
-                <span style="color:#10b981;">${displayPrice}</span>
+            // 強制判定：所有基底裝備 (ID >= 200) 若價格為 0 一律顯示「自備」
+            const isBaseItem = e.id >= 200;
+            const displayPrice = (isBaseItem && e.price === 0) ? '自備' : (e.price === 0 ? '免費' : '$' + e.price);
+            
+            box.innerHTML += `<div style="display:flex; justify-content:flex-end; gap:10px; font-size:0.95rem; margin-bottom:2px;">
+                <span style="color:${isBaseItem ? '#fff' : '#aaa'}">${e.fullName}</span>
+                <span style="color:#10b981; min-width: 50px; text-align: right;">${displayPrice}</span>
             </div>`;
         });
         container.appendChild(box);
@@ -232,6 +227,7 @@ const Cart = {
             text += `=== ${item.name} (x${item.quantity || 1}) ===\n`;
             if (item.trim) text += `🎨 模板: ${item.trim.pattern} / ${item.trim.material.name}\n`;
             item.enchants.forEach(e => {
+                // 強制判定：基底顯示自備
                 const priceText = (e.id >= 200 && e.price === 0) ? '自備' : e.price;
                 text += `${e.fullName}: ${priceText}\n`;
             });
