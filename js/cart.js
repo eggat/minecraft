@@ -117,7 +117,6 @@ const Cart = {
             return selected.incompatible.includes(enchant.name) || 
                    (enchant.incompatible && enchant.incompatible.includes(selected.name));
         });
-        
         if (isLocalIncompatible) return true;
 
         if (enchant.rarity === '特殊') {
@@ -167,7 +166,6 @@ const Cart = {
         const item = this.items[currentIndex];
         const qty = item.quantity || 1;
 
-        // 導航欄
         const nav = document.createElement('div');
         nav.style.cssText = 'display: flex; justify-content: space-between; align-items: center; background: #22222b; padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333;';
         nav.innerHTML = `
@@ -177,11 +175,9 @@ const Cart = {
         `;
         container.appendChild(nav);
 
-        // 裝備卡片內容
         const box = document.createElement('div');
         box.style.cssText = 'background: #18181b; padding: 15px; border-radius: 8px; border: 1px solid #3f3f46;';
         
-        // 名稱編輯欄
         const nameInput = document.createElement('input');
         nameInput.type = 'text';
         nameInput.value = item.name;
@@ -206,9 +202,11 @@ const Cart = {
         }
 
         item.enchants.forEach(e => {
+            // 邏輯修正：基底裝備 (ID >= 200) 若價格為 0 顯示「自備」，其餘顯示價格
+            const priceDisplay = (e.id >= 200 && e.price === 0) ? '自備' : '$' + e.price;
             box.innerHTML += `<div style="display:flex; justify-content:space-between; font-size:0.95rem;">
-                <span style="color:${e.id >= 200 ? '#aaa' : '#fff'}">${e.fullName}</span>
-                <span style="color:#10b981;">${e.price === 0 ? '自備' : '$' + e.price}</span>
+                <span style="color:${e.id >= 200 ? '#fff' : '#aaa'}">${e.fullName}</span>
+                <span style="color:#10b981;">${priceDisplay}</span>
             </div>`;
         });
         container.appendChild(box);
@@ -225,7 +223,8 @@ const Cart = {
             text += `=== ${item.name} (x${item.quantity || 1}) ===\n`;
             if (item.trim) text += `🎨 模板: ${item.trim.pattern} / ${item.trim.material.name}\n`;
             item.enchants.forEach(e => {
-                text += `${e.fullName}: ${e.price === 0 ? '自備' : '$' + e.price}\n`;
+                const priceText = (e.id >= 200 && e.price === 0) ? '自備' : e.price;
+                text += `${e.fullName}: ${priceText}\n`;
             });
             text += '\n';
         });
