@@ -411,7 +411,7 @@ h2 {
     /* 1. Logo 設定：確保它高度與標題行高一致，左側固定比例 */
     .side-logo {
         position: static;
-        width: 100px;   /* Logo 佔左側空間 */
+        width: 50%;   /* Logo 佔左側空間 */
         height: auto;
         max-height: 50px;        /* 強制限制高度，使其與 h1 的視覺高度對齊 */
         object-fit: contain;
