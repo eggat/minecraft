@@ -195,6 +195,8 @@ h2 {
 }
 
 .enchant-item {
+   display: flex;
+    justify-content: flex-end;
     background: linear-gradient(145deg, #1f1f22, #18181b);
     padding: 18px 12px;
     border-radius: 12px;
