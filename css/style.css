@@ -408,33 +408,42 @@ h2 {
 }
 
 @media (max-width: 1024px) {
-    /* Logo 處理：讓它佔據左側空間，並自動縮放填滿該區域 */
+    /* 1. Logo 設定：確保它高度與標題行高一致，左側固定比例 */
     .side-logo {
         position: static;
-        width: 30% !important;   /* 圖片佔據左側 30% 寬度 */
+        width: 20% !important;   /* Logo 佔左側空間 */
         height: auto;
-        max-height: 80px;        /* 設定圖片最高高度，避免被過度拉長 */
-        object-fit: contain;     /* 確保圖片不變形且填滿空間 */
+        max-height: 50px;        /* 強制限制高度，使其與 h1 的視覺高度對齊 */
+        object-fit: contain;
         margin-right: 10px;
     }
 
-    /* 調整標頭區塊：使用 flex 左右分割 */
+    /* 2. Header 設定：水平排列，確保垂直居中 */
     .header {
         display: flex;
-        flex-direction: row;     /* 水平排列 */
-        align-items: center;     /* 垂直置中 (讓圖片與標題高度一致) */
-        justify-content: flex-start; 
+        flex-direction: row;
+        align-items: center;     /* 關鍵：讓所有子元素在垂直中心對齊 */
+        justify-content: flex-start;
         padding: 10px;
     }
 
-    /* 標題區域：佔據剩下的 70% 寬度，並靠右對齊 */
+    /* 3. 標題區域：佔右側空間，文字靠右 */
     .header-title-group {
-        flex: 1;                 /* 佔滿剩餘寬度 */
-        text-align: right;       /* 文字靠右對齊 */
+        flex: 1;                 /* 佔據剩餘空間 */
+        text-align: right;       /* 文字靠右 */
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;   /* 讓內部的 h1 和 span 也靠右 */
     }
 
+    /* 4. 文字大小縮小：避免擠壓 */
     .header h1 {
-        font-size: 1.2rem;       /* 標題微調以適應手機螢幕 */
+        font-size: 1.1rem !important; /* 縮小字體，確保不會斷行 */
+        line-height: 1.2;
+    }
+
+    .header-subtitle {
+        font-size: 0.75rem !important; /* 副標題縮小 */
     }
 }
 
