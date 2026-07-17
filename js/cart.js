@@ -153,7 +153,9 @@ const Cart = {
         container.innerHTML = '';
 
         const totalEl = document.getElementById('total-price-value');
-        if (totalEl) totalEl.innerText = typeof Calculator !== 'undefined' && Calculator.formatPrice ? Calculator.formatPrice(this.getTotal()) : this.getTotal();
+        if (totalEl) {
+            totalEl.innerText = typeof Calculator !== 'undefined' && Calculator.formatPrice ? Calculator.formatPrice(this.getTotal()) : this.getTotal();
+        }
 
         if (this.items.length === 0) {
             container.innerHTML = `<div style="text-align: center; color: #888; padding: 20px;">報價單目前為空</div>`;
@@ -166,15 +168,17 @@ const Cart = {
         const item = this.items[currentIndex];
         const qty = item.quantity || 1;
 
+        // 左右切換導航
         const nav = document.createElement('div');
         nav.style.cssText = 'display: flex; justify-content: space-between; align-items: center; background: #22222b; padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333;';
         nav.innerHTML = `
-            <button onclick="Cart.setActiveItem('${currentIndex > 0 ? this.items[currentIndex-1].id : item.id}')" style="background:${currentIndex > 0 ? '#444' : 'transparent'}; border:none; color:#fff; padding:5px 10px; border-radius:4px; cursor:pointer;">◀</button>
+            <button onclick="Cart.setActiveItem('${currentIndex > 0 ? this.items[currentIndex-1].id : item.id}')" style="background:#444; border:none; color:#fff; padding:5px 10px; border-radius:4px; cursor:pointer;">◀</button>
             <span style="color:#fff; font-weight:bold; font-size:1rem;">${item.name} (${currentIndex + 1}/${this.items.length})</span>
-            <button onclick="Cart.setActiveItem('${currentIndex < this.items.length - 1 ? this.items[currentIndex+1].id : item.id}')" style="background:${currentIndex < this.items.length - 1 ? '#444' : 'transparent'}; border:none; color:#fff; padding:5px 10px; border-radius:4px; cursor:pointer;">▶</button>
+            <button onclick="Cart.setActiveItem('${currentIndex < this.items.length - 1 ? this.items[currentIndex+1].id : item.id}')" style="background:#444; border:none; color:#fff; padding:5px 10px; border-radius:4px; cursor:pointer;">▶</button>
         `;
         container.appendChild(nav);
 
+        // 卡片渲染
         const box = document.createElement('div');
         box.style.cssText = 'background: #18181b; padding: 15px; border-radius: 8px; border: 1px solid #3f3f46;';
         
@@ -202,7 +206,6 @@ const Cart = {
         }
 
         item.enchants.forEach(e => {
-            // 邏輯修正：基底裝備 (ID >= 200) 若價格為 0 顯示「自備」，其餘顯示價格
             const priceDisplay = (e.id >= 200 && e.price === 0) ? '自備' : '$' + e.price;
             box.innerHTML += `<div style="display:flex; justify-content:space-between; font-size:0.95rem;">
                 <span style="color:${e.id >= 200 ? '#fff' : '#aaa'}">${e.fullName}</span>
