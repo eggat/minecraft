@@ -134,7 +134,7 @@
     {"id": 211, "name": "獄髓斧", "fullName": "獄髓斧", "price": 1800, "rarity": "普通", "slots": ["axe"], "description": "基底裝備", "incompatible": []},
     {"id": 212, "name": "獄髓鋤", "fullName": "獄髓鋤", "price": 1800, "rarity": "普通", "slots": ["hoe"], "description": "基底裝備", "incompatible": []},
     {"id": 213, "name": "獄髓鏟", "fullName": "獄髓鏟", "price": 1800, "rarity": "普通", "slots": ["shovel"], "description": "基底裝備", "incompatible": []},
-    {"id": 214, "name": "獄髓重錘", "fullName": "獄髓重錘", "price": 100000, "rarity": "普通", "slots": ["mace"], "description": "基底裝備", "incompatible": []},
+    {"id": 214, "name": "重錘", "fullName": "重錘", "price": 0, "rarity": "普通", "slots": ["mace"], "description": "基底裝備", "incompatible": []},
     {"id": 215, "name": "三叉戟", "fullName": "三叉戟", "price": 0, "rarity": "普通", "slots": ["trident"], "description": "基底裝備(自備)", "incompatible": []},
     {"id": 216, "name": "獄髓長矛", "fullName": "獄髓長矛", "price": 1800, "rarity": "普通", "slots": ["spear"], "description": "基底裝備", "incompatible": []},
     {"id": 217, "name": "鞘翅", "fullName": "鞘翅", "price": 0, "rarity": "普通", "slots": ["elytra"], "description": "基底裝備(自備)", "incompatible": []},
