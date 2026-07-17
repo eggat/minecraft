@@ -484,3 +484,5 @@ body{padding:12px;}
 .header h1{font-size:1.5rem;line-height:1.2;margin:0;}
 .header-subtitle{margin-top:4px;font-size:.82rem;opacity:.85;}
 }
+
+.header-top{display:flex;align-items:center;gap:20px}.header-title-group{text-align:left}.side-logo{position:static!important;width:140px;height:auto}.container{max-width:1280px;margin:auto}@media(max-width:768px){.header-top{gap:12px}.side-logo{width:90px}.header h1{font-size:1.4rem}}
