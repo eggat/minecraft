@@ -406,6 +406,29 @@ h2 {
 .header {
     padding-top: 40px; /* 稍微留空間給上面的 Logo (如果 Logo 會擋住標題) */
 }
+
+/* ==================================================
+   手機版 Logo 與佈局優化 (追加補丁)
+   ================================================== */
+@media (max-width: 1024px) {
+    /* 將 Logo 變小並定位在 header 內，不再固定於左上角擋住內容 */
+    .side-logo {
+        position: static;    /* 取消絕對定位 */
+        width: 60px;         /* 縮小尺寸 */
+        margin-right: 15px;  /* 與標題拉開距離 */
+        filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
+    }
+
+    /* 將 header 改為水平排列，讓 Logo 和標題並排 */
+    .header {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        padding-top: 10px;
+    }
+}
+
 @media (max-width: 1024px) {
     .layout-grid {
         grid-template-columns: 1fr;
